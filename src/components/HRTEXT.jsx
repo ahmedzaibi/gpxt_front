@@ -1,18 +1,27 @@
 import React from "react";
 
-const HRTEXT = ({ left, top, width, height, label, style }) => {
+const HRTEXT = ({ label, left, top, width, height }) => {
   return (
-    <div
-      className="absolute"
-      style={{
-        left: `${left}px`,
-        top: `${top}px`,
-        width: `${width}px`,
-        height: `${height}px`,
+    <button className="btn btn-disabled" tabIndex="-1" aria-disabled="true"      style={{
+        position: "absolute",
+        left,
+        top,
+        width,
+        height,
+        fontWeight: "bold",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        padding: "4px",
+        backgroundColor: "#f0f0f0",
+        border: "1px solid #ccc",
+        fontSize:"8px"
       }}
     >
-      <p className="text-sm font-medium text-base-content">{label}</p>
-    </div>
+    {label}
+  
+      
+    </button>
   );
 };
 
