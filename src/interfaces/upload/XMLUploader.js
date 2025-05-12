@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import Layout from '../frontoffice/layout.js';
 export default function XMLUploader() {
   const navigate = useNavigate();
 
@@ -18,9 +18,17 @@ export default function XMLUploader() {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center">
+    <Layout>
+    <div 
+    className="min-h-screen flex items-center justify-center"
+    style={{ 
+      backgroundImage: 'url(/images/bg_login.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: '60% 36%'
+    }}
+    >
       <div className="card w-full max-w-xl bg-base-100 shadow-xl p-6">
-        <h2 className="text-2xl font-bold mb-4 text-center">Upload XML File</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Please upload the step as XML file</h2>
         <div className="form-control">
           <input
             type="file"
@@ -30,6 +38,6 @@ export default function XMLUploader() {
           />
         </div>
       </div>
-    </div>
+    </div></Layout>
   );
 }

@@ -1,20 +1,23 @@
 import React from "react";
 
-const HROUTPUT = ({ value, left, top, width, height }) => {
+const HROUTPUT = (props) => {
   return (
-    <hroutput
+    <div>
+    <div
       style={{
         position: "absolute",
-        left: `${left}px`,
-        top: `${top}px`,
-        width: `${width}px`,
-        height: `${height}px`,
+        left: `${parseInt(props.node.getAttribute("Left") || "0", 10)}px`,
+        top: `${parseInt(props.node.getAttribute("Top") || "0", 10)}px`,
+        width: `${parseInt(props.node.getAttribute("Width") || "0", 10)}px`,
+        height: `${parseInt(props.node.getAttribute("Height") || "0", 10)}px`,
         fontSize:"10px"
       }}
       className="border border-blue-500 bg-blue-50"
     >
-      {value}
-    </hroutput>
+      {props.node.textContent.trim()}
+    </div>
+    {props.children}
+    </div>
   );
 };
 

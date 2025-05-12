@@ -1,19 +1,19 @@
 import React from "react";
 
-const HRITEM = ({ field, left, top, width, height, children }) => {
+const HRITEM = (props) => {
   return (
     <div
       style={{
         position: "static",
-        left: `${left}px`,
-        top: `${top}px`,
-        width: `${width}px`,
-        height: `${height}px`,
+        left: `${parseInt(props.node.getAttribute("Left") || "0", 10)}px`,
+        top: `${parseInt(props.node.getAttribute("Top") || "0", 10)}px`,
+        width: `${parseInt(props.node.getAttribute("Width") || "0", 10)}px`,
+        height: `${parseInt(props.node.getAttribute("Height") || "0", 10)}px`,
       }}
       className=""
     >
       <div style={{ position: "static", width: "100%", height: "100%" }}>
-        {children}
+      {props.children}
       </div>
     </div>
   );
