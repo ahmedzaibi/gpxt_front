@@ -12,7 +12,7 @@ const HROUTPUT = (props) => {
         height: `${parseInt(props.node.getAttribute("Height") || "0", 10)}px`,
         fontSize:"10px"
       }}
-      className="border border-blue-500 bg-blue-50"
+      className="border border-blue-500 rounded-field		"
     >
       {props.node.textContent.trim()}
     </div>

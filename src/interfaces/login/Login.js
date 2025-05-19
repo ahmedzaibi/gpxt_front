@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [language , setLanguage] = useState('');
   const [error, setError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
@@ -21,19 +21,19 @@ export default function Login() {
     event.preventDefault();
     setError('');
     try {
-      const response = await fetch('http://localhost:8080/users/authentification', {
+      const hint = "standardLoginModule";
+      const response = await fetch('http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password ,language,hint})
       });
       const data = await response.json();
       if (response.ok) {
-        console.log('Login successful:', data);
+        console.log('Login successful:');
 
         // Save token and user info
-        localStorage.setItem('user', JSON.stringify(jwtDecode(data.token)));
-        localStorage.setItem('token', data.token);
-
+        localStorage.setItem('data' ,JSON.stringify(data.userDescription));
+ navigate('/upload');
         // Manage remember me
         if (rememberMe) {
           localStorage.setItem('rememberedEmail', username);
@@ -41,7 +41,7 @@ export default function Login() {
           localStorage.removeItem('rememberedEmail');
         }
 
-        navigate('/upload');
+       
       } else {
         setError(data.message || 'Invalid credentials');
       }
@@ -110,7 +110,23 @@ export default function Login() {
                   required
                 />
               </div>
-
+              <div className="pb-2 pt-4">
+                <select
+                  type="language"
+                  name="language"
+                  id="language"
+                  placeholder="language"
+                  className="block w-full    bg-black text-white select select-md"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  required
+                >
+                 <option value="fr" >Français</option>
+                  <option value="en">Anglais</option>
+                  <option value="es">Espagnol</option>
+                  <option value="de">Allemand</option>
+                  </select>
+              </div>
               <div className="flex justify-center items-center text-white-400 background-white hover:text-gray-100">
                 <input
                   checked={rememberMe}

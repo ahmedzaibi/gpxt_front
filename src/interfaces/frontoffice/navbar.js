@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 
 const Navbar = () => {
+
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50); // adjust 50px as you like
+      setIsScrolled(window.scrollY > 50);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -14,9 +15,9 @@ const Navbar = () => {
   }, []);
 
   return (
-    <div className={`navbar fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-transparent' : 'bg-neutral'}`}>
+<div className={`navbar sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-transparent' : 'bg-neutral'}`}>
       <div className="flex-1">
-        <img src="/images/logosopra.png" alt="Logo" className="btn btn-ghost text-xl" />
+        <a href="/upload"><img  src="/images/logosopra.png" alt="Logo" className="btn btn-warning btn-ghost text-xl" /></a>
       </div>
       <div className="flex gap-2">
         
@@ -41,7 +42,6 @@ const Navbar = () => {
                 
               </a>
             </li>
-            <li><a href="/login">Settings</a></li>
             <li><a href="/logout">Logout</a></li>
           </ul>
         </div>

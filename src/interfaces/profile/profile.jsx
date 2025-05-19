@@ -15,28 +15,34 @@ const Profile = () => {
     soccle: "",
     language: "",
     roles : [],
+    photo : ""
   });
+  const [profileImage, setProfileImage] = useState(null);
+
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserData = async (nudoss) => {
-    const token = localStorage.getItem("token");
-    try {
-      const response = await fetch(`http://localhost:8080/users/${nudoss}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUserData(data);
-      } else {
-        console.error("Failed to fetch user data");
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
+const fetchUserData = async (nudoss) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`http://localhost:8080/users/${nudoss}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setUserData(data);
+
+      // Load profile image if available
+      const storedImage = localStorage.getItem(`profileImage-${nudoss}`);
+      if (storedImage) setProfileImage(storedImage);
+    } else {
+      console.error("Failed to fetch user data");
     }
-  };
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+  }
+};
+
 
   useEffect(() => {
     const loadUser = async () => {
@@ -53,30 +59,34 @@ const Profile = () => {
     loadUser();
   }, []);
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem("token");
-    try {
-      const response = await fetch(`http://localhost:8080/users/updateUser/${userData.nudoss}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(userData),
-      });
+ const handleSave = async (e) => {
+  e.preventDefault();
+  const token = localStorage.getItem("token");
+  try {
+    const response = await fetch(`http://localhost:8080/users/updateUser/${userData.nudoss}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(userData),
+    });
 
-      if (response.ok) {
-        await fetchUserData(userData.nudoss);
-        setEditMode(false);
-      } else {
-        console.error("Failed to update user:", response.status);
-        alert("Erreur lors de la mise à jour du profil.");
+    if (response.ok) {
+      if (profileImage) {
+        localStorage.setItem(`profileImage-${userData.nudoss}`, profileImage);
       }
-    } catch (error) {
-      console.error("Error updating user:", error);
+      await fetchUserData(userData.nudoss);
+      setEditMode(false);
+    } else {
+      console.error("Failed to update user:", response.status);
+      alert("Erreur lors de la mise à jour du profil.");
     }
-  };
+  } catch (error) {
+    console.error("Error updating user:", error);
+  }
+};
+
 
   if (loading) return <p>Loading...</p>;
 
@@ -93,11 +103,12 @@ const Profile = () => {
         <div className="relative w-full max-w-4xl px-6 py-20 bg-white/10 backdrop-blur-md rounded-3xl shadow-lg border border-white/20 text-white">
           {/* Avatar on top */}
           <div className="absolute -top-14 left-1/2 transform -translate-x-1/2">
-            <img
-              src="https://i.pravatar.cc/150"
-              alt="avatar"
-              className="w-28 h-28 rounded-full border-4 border-white shadow-lg"
-            />
+           <img
+  src={profileImage || "https://i.pravatar.cc/150"}
+  alt="avatar"
+  className="w-28 h-28 rounded-full border-4 border-white shadow-lg"
+/>
+
           </div>
 
           {/* Content inside the card */}
@@ -108,6 +119,28 @@ const Profile = () => {
 
             {editMode ? (
               <form onSubmit={handleSave}>
+                <div className="flex flex-col items-center mb-6">
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setProfileImage(reader.result);
+          setUserData((prev) => ({ ...prev, hasPhoto: true }));
+        };
+        reader.readAsDataURL(file);
+      }
+    }}
+    className="text-white"
+  />
+  {profileImage && (
+    <img src={profileImage} alt="Preview" className="w-28 h-28 rounded-full mt-4 border-2 border-white shadow" />
+  )}
+</div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto text-left">
                   {[
                     { label: "Username", key: "username" },
