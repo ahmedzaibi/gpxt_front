@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 const Navbar = () => {
-
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -10,21 +9,32 @@ const Navbar = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-    
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-<div className={`navbar sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-transparent' : 'bg-neutral'}`}>
+    <div
+      className={`navbar sticky top-0 z-50 transition-all duration-300 ${
+        isScrolled ? "bg-transparent" : "bg-neutral"
+      }`}
+    >
       <div className="flex-1">
-        <a href="/upload"><img  src="/images/logosopra.png" alt="Logo" className="btn btn-warning btn-ghost text-xl" /></a>
+        <a href="/upload">
+          <img
+            src="/images/logosopra.png"
+            alt="Logo"
+            className="btn btn-warning btn-ghost text-xl"
+          />
+        </a>
       </div>
       <div className="flex gap-2">
-        
-       
-       
         <div className="dropdown dropdown-end">
-          <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+          <div
+            tabIndex={0}
+            role="button"
+            className="btn btn-ghost btn-circle avatar"
+          >
             <div className="w-10 rounded-full">
               <img
                 alt="Not Found"
@@ -39,10 +49,11 @@ const Navbar = () => {
             <li>
               <a href="/Profile" className="justify-between">
                 Profile
-                
               </a>
             </li>
-            <li><a href="/logout">Logout</a></li>
+            <li>
+              <a href="/logout">Logout</a>
+            </li>
           </ul>
         </div>
       </div>

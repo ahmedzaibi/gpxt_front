@@ -1,52 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [language , setLanguage] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [language, setLanguage] = useState("");
+  const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const savedUsername = localStorage.getItem('rememberedEmail');
+    const savedUsername = localStorage.getItem("rememberedEmail");
     if (savedUsername) {
       setUsername(savedUsername);
-      setRememberMe(true); 
+      setRememberMe(true);
     }
   }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError('');
+    setError("");
     try {
       const hint = "standardLoginModule";
-      const response = await fetch('http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password ,language,hint})
-      });
+      const response = await fetch(
+        "http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, language, hint }),
+        }
+      );
       const data = await response.json();
       if (response.ok) {
-        console.log('Login successful:');
+        console.log("Login successful:");
 
         // Save token and user info
-        localStorage.setItem('data' ,JSON.stringify(data.userDescription));
- navigate('/upload');
+        localStorage.setItem("data", JSON.stringify(data.userDescription));
+        navigate("/upload");
         // Manage remember me
         if (rememberMe) {
-          localStorage.setItem('rememberedEmail', username);
+          localStorage.setItem("rememberedEmail", username);
         } else {
-          localStorage.removeItem('rememberedEmail');
+          localStorage.removeItem("rememberedEmail");
         }
-
-       
       } else {
-        setError(data.message || 'Invalid credentials');
+        setError(data.message || "Invalid credentials");
       }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError("Login failed. Please try again.");
     }
   };
 
@@ -54,25 +55,31 @@ export default function Login() {
     <section className="min-h-screen flex items-stretch text-white">
       <div
         className="lg:flex w-1/2 hidden bg-no-repeat bg-center bg-cover relative items-center"
-        style={{ backgroundImage: 'url(/images/bg_login.png)' }}
+        style={{ backgroundImage: "url(/images/bg_login.png)" }}
       >
         <div className="absolute bg-black opacity-60 "></div>
       </div>
 
       <div
         className="lg:w-1/2 w-full flex items-center justify-center text-center md:px-16 px-0 z-0"
-        style={{ backgroundColor: '#161616' }}
+        style={{ backgroundColor: "#161616" }}
       >
         <div
           className="absolute lg:hidden z-10 inset-0 bg-no-repeat bg-center bg-cover items-center"
-          style={{ backgroundImage: 'url(/images/bg_login.png)' }}
+          style={{ backgroundImage: "url(/images/bg_login.png)" }}
         >
           <div className="absolute bg-black opacity-60 inset-0 z-0"></div>
         </div>
 
         <div className="w-full py-6 z-20">
           <div className="w-full z-10 flex items-center justify-end">
-            <h1 className="text-2xl font-semibold tracking-wide pl-2 hover:text-[#FFCA23]" style={{ fontFamily: 'Hurme Geometric Sans 3, sans-serif', fontWeight: 300 }}>
+            <h1
+              className="text-2xl font-semibold tracking-wide pl-2 hover:text-[#FFCA23]"
+              style={{
+                fontFamily: "Hurme Geometric Sans 3, sans-serif",
+                fontWeight: 300,
+              }}
+            >
               Together, we shape the future.
             </h1>
             <img src="/images/logosopra.png" alt="Logo" className="h-16" />
@@ -88,7 +95,6 @@ export default function Login() {
             <form onSubmit={handleSubmit}>
               <div className="pb-2 pt-4">
                 <input
-                  
                   name="email"
                   id="email"
                   placeholder="Email"
@@ -121,11 +127,11 @@ export default function Login() {
                   onChange={(e) => setLanguage(e.target.value)}
                   required
                 >
-                 <option value="fr" >Français</option>
+                  <option value="fr">Français</option>
                   <option value="en">Anglais</option>
                   <option value="es">Espagnol</option>
                   <option value="de">Allemand</option>
-                  </select>
+                </select>
               </div>
               <div className="flex justify-center items-center text-white-400 background-white hover:text-gray-100">
                 <input
@@ -147,7 +153,6 @@ export default function Login() {
               </div>
             </form>
           </div>
-
         </div>
       </div>
     </section>

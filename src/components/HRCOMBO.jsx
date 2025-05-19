@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const HRCOMBO = ({ node, children }) => {
   const [value, setValue] = useState("");
@@ -29,19 +29,21 @@ const HRCOMBO = ({ node, children }) => {
       <select
         value={value}
         onChange={handleChange}
-        data-id={id}  // Add this attribute for later querying
+        data-id={id} // Add this attribute for later querying
         style={{
           position: "absolute",
           left: parseInt(node.getAttribute("Left") || "0", 10) + "px",
           top: parseInt(node.getAttribute("Top") || "0", 10) + "px",
           width: parseInt(node.getAttribute("Width") || "100", 10) + "px",
           height: parseInt(node.getAttribute("Height") || "30", 10) + "px",
-          fontSize: "10px"
+          fontSize: "10px",
         }}
         className="input border border-blue-500 bg-blue-50"
       >
-        {options.map(opt => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
         ))}
       </select>
       {children}

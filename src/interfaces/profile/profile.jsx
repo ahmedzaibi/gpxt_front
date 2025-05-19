@@ -14,35 +14,34 @@ const Profile = () => {
     matcle: "",
     soccle: "",
     language: "",
-    roles : [],
-    photo : ""
+    roles: [],
+    photo: "",
   });
   const [profileImage, setProfileImage] = useState(null);
 
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
-const fetchUserData = async (nudoss) => {
-  const token = localStorage.getItem("token");
-  try {
-    const response = await fetch(`http://localhost:8080/users/${nudoss}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setUserData(data);
+  const fetchUserData = async (nudoss) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(`http://localhost:8080/users/${nudoss}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUserData(data);
 
-      // Load profile image if available
-      const storedImage = localStorage.getItem(`profileImage-${nudoss}`);
-      if (storedImage) setProfileImage(storedImage);
-    } else {
-      console.error("Failed to fetch user data");
+        // Load profile image if available
+        const storedImage = localStorage.getItem(`profileImage-${nudoss}`);
+        if (storedImage) setProfileImage(storedImage);
+      } else {
+        console.error("Failed to fetch user data");
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-  }
-};
-
+  };
 
   useEffect(() => {
     const loadUser = async () => {
@@ -59,59 +58,58 @@ const fetchUserData = async (nudoss) => {
     loadUser();
   }, []);
 
- const handleSave = async (e) => {
-  e.preventDefault();
-  const token = localStorage.getItem("token");
-  try {
-    const response = await fetch(`http://localhost:8080/users/updateUser/${userData.nudoss}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(userData),
-    });
+  const handleSave = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(
+        `http://localhost:8080/users/updateUser/${userData.nudoss}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(userData),
+        }
+      );
 
-    if (response.ok) {
-      if (profileImage) {
-        localStorage.setItem(`profileImage-${userData.nudoss}`, profileImage);
+      if (response.ok) {
+        if (profileImage) {
+          localStorage.setItem(`profileImage-${userData.nudoss}`, profileImage);
+        }
+        await fetchUserData(userData.nudoss);
+        setEditMode(false);
+      } else {
+        console.error("Failed to update user:", response.status);
+        alert("Erreur lors de la mise à jour du profil.");
       }
-      await fetchUserData(userData.nudoss);
-      setEditMode(false);
-    } else {
-      console.error("Failed to update user:", response.status);
-      alert("Erreur lors de la mise à jour du profil.");
+    } catch (error) {
+      console.error("Error updating user:", error);
     }
-  } catch (error) {
-    console.error("Error updating user:", error);
-  }
-};
-
+  };
 
   if (loading) return <p>Loading...</p>;
 
   return (
     <Layout>
       <div
-  className="flex items-center justify-center min-h-screen bg-cover bg-center pt-32"
-  style={{ backgroundImage: `url('/images/bg_login.png')`,
-    backgroundSize: 'cover',
-    backgroundPosition: '90% 36%'
-   }}
->
-
+        className="flex items-center justify-center min-h-screen bg-cover bg-center pt-32"
+        style={{
+          backgroundImage: `url('/images/bg_login.png')`,
+          backgroundSize: "cover",
+          backgroundPosition: "90% 36%",
+        }}
+      >
         <div className="relative w-full max-w-4xl px-6 py-20 bg-white/10 backdrop-blur-md rounded-3xl shadow-lg border border-white/20 text-white">
-          {/* Avatar on top */}
           <div className="absolute -top-14 left-1/2 transform -translate-x-1/2">
-           <img
-  src={profileImage || "https://i.pravatar.cc/150"}
-  alt="avatar"
-  className="w-28 h-28 rounded-full border-4 border-white shadow-lg"
-/>
-
+            <img
+              src={profileImage || "https://i.pravatar.cc/150"}
+              alt="avatar"
+              className="w-28 h-28 rounded-full border-4 border-white shadow-lg"
+            />
           </div>
 
-          {/* Content inside the card */}
           <div className="mt-20 text-center">
             <h1 className="text-3xl font-bold mb-4">
               {editMode ? "Modifier Profil" : "Mon Profil"}
@@ -120,26 +118,30 @@ const fetchUserData = async (nudoss) => {
             {editMode ? (
               <form onSubmit={handleSave}>
                 <div className="flex flex-col items-center mb-6">
-  <input
-    type="file"
-    accept="image/*"
-    onChange={(e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setProfileImage(reader.result);
-          setUserData((prev) => ({ ...prev, hasPhoto: true }));
-        };
-        reader.readAsDataURL(file);
-      }
-    }}
-    className="text-white"
-  />
-  {profileImage && (
-    <img src={profileImage} alt="Preview" className="w-28 h-28 rounded-full mt-4 border-2 border-white shadow" />
-  )}
-</div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setProfileImage(reader.result);
+                          setUserData((prev) => ({ ...prev, hasPhoto: true }));
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="text-white"
+                  />
+                  {profileImage && (
+                    <img
+                      src={profileImage}
+                      alt="Preview"
+                      className="w-28 h-28 rounded-full mt-4 border-2 border-white shadow"
+                    />
+                  )}
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto text-left">
                   {[
@@ -149,13 +151,18 @@ const fetchUserData = async (nudoss) => {
                     { label: "Phone Number", key: "phonenumber" },
                   ].map((field) => (
                     <div key={field.key}>
-                      <label className="block mb-1 text-white/80">{field.label}</label>
+                      <label className="block mb-1 text-white/80">
+                        {field.label}
+                      </label>
                       <input
                         type="text"
                         name={field.key}
                         value={userData[field.key]}
                         onChange={(e) =>
-                          setUserData({ ...userData, [field.key]: e.target.value })
+                          setUserData({
+                            ...userData,
+                            [field.key]: e.target.value,
+                          })
                         }
                         className="w-full p-2 rounded-md bg-white/20 text-white border border-white/30 focus:outline-none focus:ring focus:ring-blue-300"
                       />
@@ -193,8 +200,12 @@ const fetchUserData = async (nudoss) => {
                     { label: "Language", key: "language" },
                   ].map((field) => (
                     <div key={field.key}>
-                      <label className="block mb-1 text-white/80">{field.label}</label>
-                      <p className="bg-white/10 p-2 rounded-md">{userData[field.key]}</p>
+                      <label className="block mb-1 text-white/80">
+                        {field.label}
+                      </label>
+                      <p className="bg-white/10 p-2 rounded-md">
+                        {userData[field.key]}
+                      </p>
                     </div>
                   ))}
                 </div>

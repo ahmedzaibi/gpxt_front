@@ -7,7 +7,6 @@ import HREDIT from "./HREDIT.jsx";
 import HRCOMBO from "./HRCOMBO.jsx";
 import HRPAGE from "./HRPAGE.jsx";
 import Layout from "../interfaces/frontoffice/layout.js";
-
 const FormRenderer = () => {
   const location = useLocation();
   const xmlData = location.state?.xmlData;
@@ -51,8 +50,6 @@ const FormRenderer = () => {
           const elem = React.createElement(definedlm[child.tagName], {
             node: child,
             children: elemChildren,
-          
-
           });
           children.push(elem);
         } else if (
@@ -79,55 +76,57 @@ const FormRenderer = () => {
 
     parseComponents();
 
- if (hrpageLabelnode) {
-  const label = hrpageLabelnode.getAttribute("Label");
-  setLabelNode(label);
+    if (hrpageLabelnode) {
+      const label = hrpageLabelnode.getAttribute("Label");
+      setLabelNode(label);
 
-  // Send the API request with label and file
-  const formData = new FormData();
-  const blob = new Blob([xmlData], { type: "text/xml" });
+      // Send the API request with label and file
+      const formData = new FormData();
+      const blob = new Blob([xmlData], { type: "text/xml" });
 
-  formData.append("label", label);
-  formData.append("file", blob, `${label || "form"}.xml`);
+      formData.append("label", label);
+      formData.append("file", blob, `${label || "form"}.xml`);
 
-  fetch("http://localhost:8080/api/forms/upload", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => {
-      if (!res.ok) throw new Error("form saving failed");
-      return res.text();
-    })
-    .then((text) => {
-      console.log("✅ Form saved:", text);
-    })
-    .catch((err) => {
-      console.error("❌ form saving error:", err);
-    });
-}
+      fetch("http://localhost:8080/api/forms/upload", {
+        method: "POST",
+        body: formData,
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("form saving failed");
+          return res.text();
+        })
+        .then((text) => {
+          console.log("✅ Form saved:", text);
+        })
+        .catch((err) => {
+          console.error("❌ form saving error:", err);
+        });
+    }
   }, [xmlData]);
 
-const handleSave = () => {
-  const container = document.querySelector(".relative.bg-gray-50");
-  if (!container) return;
+  const handleSave = () => {
+    const container = document.querySelector(".relative.bg-gray-50");
+    if (!container) return;
 
-  const inputs = container.querySelectorAll("input[data-id], select[data-id]");
-  const values = {};
-  inputs.forEach((input) => {
-    values[input.getAttribute("data-id")] = input.value;
-  });
+    const inputs = container.querySelectorAll(
+      "input[data-id], select[data-id]"
+    );
+    const values = {};
+    inputs.forEach((input) => {
+      values[input.getAttribute("data-id")] = input.value;
+    });
 
-  localStorage.setItem("formData", JSON.stringify(values));
-  alert("Form data saved to localStorage!");
-};
-
-
+    localStorage.setItem("formData", JSON.stringify(values));
+    alert("Form data saved to localStorage!");
+  };
 
   return (
     <Layout>
       <div className="flex justify-center items-start min-h-screen glass px-8 py-16">
         <div className="w-full max-w-6xl p-16 shadow-xl bg-grey-200 border rounded-lg">
-          <h2 className="text-3xl font-bold mb-6 text-center text-white">{labelNode}</h2>
+          <h2 className="text-3xl font-bold mb-6 text-center text-white">
+            {labelNode}
+          </h2>
           <div
             className="relative bg-gray-50 border border-dashed border-gray-300 mx-auto"
             style={{
