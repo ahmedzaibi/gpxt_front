@@ -1,55 +1,51 @@
 import React from "react";
 
-const HRTEXT = (props) => {
+const HRTEXT = ({ node, children }) => {
+  const label = extractLabel(node);
+
   return (
     <div>
-      <button
-        className="btn btn-disabled"
-        tabIndex="-1"
-        aria-disabled="true"
+      <div
+        className="bg-white/10 text-white rounded-md px-2 flex items-center font-bold text-xs"
         style={{
           position: "absolute",
-          left: `${parseInt(props.node.getAttribute("Left") || "0", 10)}px`,
-          top: `${parseInt(props.node.getAttribute("Top") || "0", 10)}px`,
-          width: `${parseInt(props.node.getAttribute("Width") || "0", 10)}px`,
-          height: `${parseInt(props.node.getAttribute("Height") || "0", 10)}px`,
-          fontWeight: "bold",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          padding: "4px",
-          backgroundColor: "#f0f0f0",
-          border: "1px solid #ccc",
-          fontSize: "8px",
+          left: `${parseInt(node.getAttribute("Left") || "0", 10)}px`,
+          top: `${parseInt(node.getAttribute("Top") || "0", 10)}px`,
+          width: `${parseInt(node.getAttribute("Width") || "0", 10)}px`,
+          height: `${parseInt(node.getAttribute("Height") || "0", 10)}px`,
+          fontSize: "10px",
         }}
+        tabIndex="-1"
+        aria-disabled="true"
       >
-        {extractLabel(props.node)}
-      </button>
-      {props.children}
+        {label}
+      </div>
+      {children}
     </div>
   );
 };
+
 const extractLabel = (hrTextNode) => {
-  var lang = localStorage.getItem("lang");
+  const lang = localStorage.getItem("lang");
   const labelNode = hrTextNode.querySelector("HRLABELS > HRLABEL");
+
   if (labelNode) {
     if (lang) {
-      var label = Array.from(labelNode.childNodes).filter(
+      const localized = Array.from(labelNode.childNodes).find(
         (node) =>
           node.nodeType === Node.ELEMENT_NODE &&
           node.getAttribute("Lang") === lang
       );
-      if (label.length > 0) {
-        return label[0].textContent.trim();
-      }
+      if (localized) return localized.textContent.trim();
     }
-    label = Array.from(labelNode.childNodes).filter(
+
+    const defaultText = Array.from(labelNode.childNodes).find(
       (node) => node.nodeType === Node.TEXT_NODE
     );
-    if (label.length > 0) {
-      return label[0].nodeValue.trim();
-    }
+    if (defaultText) return defaultText.nodeValue.trim();
   }
+
   return "";
 };
+
 export default HRTEXT;

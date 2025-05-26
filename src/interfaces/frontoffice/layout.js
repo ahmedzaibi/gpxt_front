@@ -1,6 +1,7 @@
 import {
   UserCircleIcon,
   DocumentArrowUpIcon,
+  NumberedListIcon,
 } from "@heroicons/react/24/outline";
 import Navbar from "./navbar";
 import Footer from "./footer";
@@ -27,6 +28,15 @@ const Layout = ({ children }) => {
 
                   <span className="ml-2 hidden group-hover:inline">
                     Upload XML
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="/XmlFormList" className="hover:bg-gray-800 rounded-md">
+                  <NumberedListIcon className="h-6 w-6" />
+
+                  <span className="ml-2 hidden group-hover:inline">
+                    liste des étapes ajoutées
                   </span>
                 </a>
               </li>

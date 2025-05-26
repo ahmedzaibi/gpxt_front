@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const HREDIT = ({ node, children }) => {
   const [value, setValue] = useState("");
@@ -29,10 +29,10 @@ const HREDIT = ({ node, children }) => {
           top: `${parseInt(node.getAttribute("Top") || "0", 10)}px`,
           width: `${parseInt(node.getAttribute("Width") || "0", 10)}px`,
           height: `${parseInt(node.getAttribute("Height") || "0", 10)}px`,
-          fontSize: "10px"
+          fontSize: "10px",
         }}
-        className="input border border-blue-500 bg-blue-50"
-        data-id={id}  // Important: add an attribute to identify input later
+        className="bg-white/10 text-white rounded-md px-2 flex items-center text-xs"
+        data-id={id}
       />
       {children}
     </div>

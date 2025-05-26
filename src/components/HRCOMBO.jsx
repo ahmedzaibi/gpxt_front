@@ -29,7 +29,7 @@ const HRCOMBO = ({ node, children }) => {
       <select
         value={value}
         onChange={handleChange}
-        data-id={id} // Add this attribute for later querying
+        data-id={id}
         style={{
           position: "absolute",
           left: parseInt(node.getAttribute("Left") || "0", 10) + "px",
@@ -38,7 +38,7 @@ const HRCOMBO = ({ node, children }) => {
           height: parseInt(node.getAttribute("Height") || "30", 10) + "px",
           fontSize: "10px",
         }}
-        className="input border border-blue-500 bg-blue-50"
+        className="bg-white/10 text-white rounded-md px-2 flex items-center text-xs"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

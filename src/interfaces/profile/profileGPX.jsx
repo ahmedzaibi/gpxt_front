@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../frontoffice/layout";
-
 const ProfileGPX = () => {
   const [userData, setUserData] = useState({
     nudoss: "",

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [language, setLanguage] = useState("");
+  const [language, setLanguage] = useState("fr");
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
@@ -17,37 +17,92 @@ export default function Login() {
     }
   }, []);
 
+  const headersAlpha = {
+    "Content-Type": "application/json",
+    Cookie:
+      "com.hraccess.portal.connection.id=CbkZxKx5L4Z1Zm7Y37xIw6QS6q2vqvGXbIiSxtp9tkmtRaXmGsVJKUk57I8ma0YU; virtualSessionId=CbkZxKx5L4Z1Zm7Y37xIw6QS6q2vqvGXbIiSxtp9tkmtRaXmGsVJKUk57I8ma0YU",
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+
     try {
       const hint = "standardLoginModule";
+
       const response = await fetch(
-        "http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/login",
+        `http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ username, password, language, hint }),
         }
       );
-      const data = await response.json();
-      if (response.ok) {
-        console.log("Login successful:");
 
-        // Save token and user info
-        localStorage.setItem("data", JSON.stringify(data.userDescription));
-        navigate("/upload");
-        // Manage remember me
+      const data = await response.json();
+
+      if (data.status === "OK") {
+        sessionStorage.setItem(
+          "userInfo",
+          JSON.stringify(data.userDescription)
+        );
+        sessionStorage.setItem("allUsers", JSON.stringify(data.roles));
+
+        if (data.APP_CONFIG?.DOMAIN_URL) {
+          sessionStorage.setItem("DOMAIN_URL", data.APP_CONFIG.DOMAIN_URL);
+        }
+
         if (rememberMe) {
           localStorage.setItem("rememberedEmail", username);
         } else {
           localStorage.removeItem("rememberedEmail");
         }
+
+        // Find the current role excluding HRREP category
+        const currentRole = data.roles.role?.find(
+          (role) => role["@category"] !== "HRREP"
+        );
+
+        if (currentRole) {
+          sessionStorage.setItem(
+            "current-user-ss",
+            JSON.stringify(currentRole)
+          );
+          console.log("Stored currentRole:", currentRole);
+
+          const baseUrl =
+            "http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/gpmenu";
+
+          // Access '@name' correctly
+          const roleParam = encodeURIComponent(currentRole["@name"]);
+          const finalUrl = `${baseUrl}?path=employee&role=${roleParam}`;
+
+          console.log("Calling API with URL:", finalUrl);
+
+          fetch(finalUrl, {
+            method: "GET",
+            headers: headersAlpha,
+            credentials: "include",
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              console.log("Initial data:", result);
+            })
+            .catch((err) => {
+              console.error("API call failed:", err);
+            });
+        } else {
+          console.warn("No valid current role found to make API call.");
+        }
+
+        navigate("/upload");
       } else {
         setError(data.message || "Invalid credentials");
       }
     } catch (err) {
       setError("Login failed. Please try again.");
+      console.error("Login error:", err);
     }
   };
 
@@ -118,11 +173,9 @@ export default function Login() {
               </div>
               <div className="pb-2 pt-4">
                 <select
-                  type="language"
                   name="language"
                   id="language"
-                  placeholder="language"
-                  className="block w-full    bg-black text-white select select-md"
+                  className="block w-full bg-black text-white select select-md"
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
                   required

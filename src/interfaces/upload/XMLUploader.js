@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../frontoffice/layout.js";
 export default function XMLUploader() {
   const navigate = useNavigate();
-
   const handleFileUpload = (event) => {
     const file = event.target.files?.[0];
     if (file) {

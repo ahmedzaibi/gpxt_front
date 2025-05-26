@@ -122,13 +122,20 @@ const FormRenderer = () => {
 
   return (
     <Layout>
-      <div className="flex justify-center items-start min-h-screen glass px-8 py-16">
-        <div className="w-full max-w-6xl p-16 shadow-xl bg-grey-200 border rounded-lg">
+      <div
+        className="flex items-center justify-center min-h-screen bg-cover bg-center pt-32"
+        style={{
+          backgroundImage: `url('/images/bg_login.png')`,
+          backgroundSize: "cover",
+          backgroundPosition: "90% 36%",
+        }}
+      >
+        <div className="w-full max-w-6xl p-16 shadow-xl  rounded-lg">
           <h2 className="text-3xl font-bold mb-6 text-center text-white">
             {labelNode}
           </h2>
           <div
-            className="relative bg-gray-50 border border-dashed border-gray-300 mx-auto"
+            className="relative w-full max-w-4xl px-6 py-20 bg-white/10 backdrop-blur-md rounded-3xl shadow-lg border border-white/20 text-white"
             style={{
               width: "100%",
               position: "relative",
