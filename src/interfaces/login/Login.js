@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { DataContext } from "../context/DataContext";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -9,6 +11,14 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
+  const {
+    setRequests,
+    setDocuments,
+    setNotifications,
+    setTasks,
+    setClosedTasks,
+  } = useContext(DataContext);
+
   useEffect(() => {
     const savedUsername = localStorage.getItem("rememberedEmail");
     if (savedUsername) {
@@ -17,30 +27,25 @@ export default function Login() {
     }
   }, []);
 
-  const headersAlpha = {
-    "Content-Type": "application/json",
-    Cookie:
-      "com.hraccess.portal.connection.id=CbkZxKx5L4Z1Zm7Y37xIw6QS6q2vqvGXbIiSxtp9tkmtRaXmGsVJKUk57I8ma0YU; virtualSessionId=CbkZxKx5L4Z1Zm7Y37xIw6QS6q2vqvGXbIiSxtp9tkmtRaXmGsVJKUk57I8ma0YU",
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
 
     try {
-      const hint = "standardLoginModule";
-
-      const response = await fetch(
-        `http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/login`,
+      const response = await axios.post(
+        "http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/login",
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ username, password, language, hint }),
+          username,
+          password,
+          language,
+          hint: "standardLoginModule",
+        },
+        {
+          withCredentials: true,
         }
       );
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.status === "OK") {
         sessionStorage.setItem(
@@ -59,7 +64,6 @@ export default function Login() {
           localStorage.removeItem("rememberedEmail");
         }
 
-        // Find the current role excluding HRREP category
         const currentRole = data.roles.role?.find(
           (role) => role["@category"] !== "HRREP"
         );
@@ -69,40 +73,50 @@ export default function Login() {
             "current-user-ss",
             JSON.stringify(currentRole)
           );
-          console.log("Stored currentRole:", currentRole);
 
-          const baseUrl =
-            "http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/gpmenu";
-
-          // Access '@name' correctly
           const roleParam = encodeURIComponent(currentRole["@name"]);
-          const finalUrl = `${baseUrl}?path=employee&role=${roleParam}`;
+          const result = await axios.get(
+            `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/gpmenu?path=employee&role=${roleParam}`,
+            {
+              withCredentials: true,
+            }
+          );
 
-          console.log("Calling API with URL:", finalUrl);
-
-          fetch(finalUrl, {
-            method: "GET",
-            headers: headersAlpha,
-            credentials: "include",
-          })
-            .then((res) => res.json())
-            .then((result) => {
-              console.log("Initial data:", result);
-            })
-            .catch((err) => {
-              console.error("API call failed:", err);
-            });
-        } else {
-          console.warn("No valid current role found to make API call.");
+          // Optional logging
+          console.log("Initial data:", result.data);
         }
 
-        navigate("/upload");
+        // Set up Authorization header
+        if (data.token) {
+          axios.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${data.token}`;
+        }
+
+        // Fetch data to populate context
+        const [reqs, docs, notifs, taskOpen, taskClosed] = await Promise.all([
+          axios.get("/api/requests"),
+          axios.get("/api/documents"),
+          axios.get("/api/notifications"),
+          axios.get("/api/tasks"),
+          axios.get("/api/closedTasks"),
+        ]);
+
+        // Save in context
+        setRequests(reqs.data.list || []);
+        setDocuments(docs.data.list || []);
+        setNotifications(notifs.data.list || []);
+        setTasks(taskOpen.data.list || []);
+        setClosedTasks(taskClosed.data.list || []);
+
+        // Navigate to dashboard
+        navigate("/dashboard");
       } else {
         setError(data.message || "Invalid credentials");
       }
     } catch (err) {
-      setError("Login failed. Please try again.");
       console.error("Login error:", err);
+      setError("Login failed. Please check your connection or credentials.");
     }
   };
 
@@ -152,6 +166,7 @@ export default function Login() {
                 <input
                   name="email"
                   id="email"
+                  autoComplete="username"
                   placeholder="Email"
                   className="block w-full p-4 text-lg rounded-sm bg-black text-white"
                   value={username}
@@ -164,6 +179,7 @@ export default function Login() {
                   type="password"
                   name="password"
                   id="password"
+                  autoComplete="current-password"
                   placeholder="Password"
                   className="block w-full p-4 text-lg rounded-sm bg-black text-white"
                   value={password}
@@ -186,14 +202,18 @@ export default function Login() {
                   <option value="de">Allemand</option>
                 </select>
               </div>
-              <div className="flex justify-center items-center text-white-400 background-white hover:text-gray-100">
+              <div className="flex justify-center items-center text-white-400 hover:text-gray-100">
                 <input
+                  id="rememberMe"
+                  name="rememberMe"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                   type="checkbox"
                   className="toggle border-white bg-white checked:border-white checked:bg-white-600 checked:text-black"
                 />
-                <p className="pl-2">Remember me</p>
+                <label htmlFor="rememberMe" className="pl-2">
+                  Remember me
+                </label>
               </div>
 
               <div className="pb-2 pt-4">

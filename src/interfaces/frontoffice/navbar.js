@@ -72,6 +72,92 @@ const Navbar = () => {
             />
           </a>
         </div>
+        <div className="flex gap-2  items-center">
+          {/* Paper Plane Icon */}
+          <button className="btn btn-square btn-ghost btn-warning">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2.5"
+              stroke="white"
+              className="size-[1.2em]"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21.75 2.25L11.25 12.75"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21.75 2.25L14.25 21.75L11.25 12.75L2.25 9.75L21.75 2.25Z"
+              />
+            </svg>
+          </button>
+
+          {/* Bell Icon */}
+          <button className="btn btn-square btn-ghost btn-warning">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2.5"
+              stroke="white"
+              className="size-[1.2em]"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11
+         c0-3.038-1.343-5.443-4-5.917V4a2 2 0 00-4 0v1.083
+         C7.343 5.557 6 7.962 6 11v3.159c0 .538-.214 1.055-.595
+         1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
+            </svg>
+          </button>
+
+          {/* Message Icon (Envelope) */}
+          <button className="btn btn-square btn-ghost btn-warning">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2.5"
+              stroke="white"
+              className="size-[1.2em]"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21.75 6.75v10.5A2.25 2.25 0 0119.5
+        19.5h-15a2.25 2.25 0 01-2.25-2.25V6.75m0
+        0l9 6.75 9-6.75m-18 0A2.25 2.25 0 014.5
+        4.5h15a2.25 2.25 0 012.25 2.25"
+              />
+            </svg>
+          </button>
+
+          {/* Document Icon */}
+          <button className="btn btn-square btn-ghost btn-warning">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2.5"
+              stroke="white"
+              className="size-[1.2em]"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12h6m-6 4h6m2 4H7a2 2 0
+        01-2-2V6a2 2 0 012-2h7l5
+        5v11a2 2 0 01-2 2z"
+              />
+            </svg>
+          </button>
+        </div>
 
         <div className="flex gap-2 items-center">
           <div className="relative" ref={dropdownRef}>
