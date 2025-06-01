@@ -1,10 +1,8 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
-import Logout from "./Logout";
+import { Navigate, Outlet } from "react-router-dom";
+
 const PrivateRoute = () => {
-  const data = JSON.parse(sessionStorage.getItem("userInfo"));
-  if (!data) return Logout();
-  return <Outlet />;
+  const userInfo = sessionStorage.getItem("userInfo");
+  return userInfo ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default PrivateRoute;

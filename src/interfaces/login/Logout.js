@@ -1,20 +1,22 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Logout = () => {
   const navigate = useNavigate();
+  const hasLoggedOut = useRef(false); // ✅ Track if logout has run
 
   useEffect(() => {
     const logout = async () => {
-      const domainUrl =
-        sessionStorage.getItem("DOMAIN_URL") || window.location.origin;
+      if (hasLoggedOut.current) return; // ✅ Prevent multiple calls
+      hasLoggedOut.current = true;
 
       try {
-        sessionStorage.clear();
-        await fetch(
-          `${domainUrl}/hr-business-services-rest/business-services/logout`,
+        await axios.get(
+          `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/logout`,
+
           {
-            method: "GET",
+            withCredentials: true,
           }
         );
       } catch (err) {
@@ -22,10 +24,11 @@ const Logout = () => {
       } finally {
         const rememberedEmail = localStorage.getItem("rememberedEmail");
         localStorage.clear();
+        sessionStorage.clear();
         if (rememberedEmail) {
           localStorage.setItem("rememberedEmail", rememberedEmail);
         }
-        navigate("/login");
+        navigate("/login", { replace: true });
       }
     };
 

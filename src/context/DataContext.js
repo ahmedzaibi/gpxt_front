@@ -3,17 +3,20 @@ import React, { createContext, useState } from "react";
 export const DataContext = createContext();
 
 export const DataProvider = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [requests, setRequests] = useState([]);
-  const [documents, setDocuments] = useState([]);
+  const [reports, setReports] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [closedTasks, setClosedTasks] = useState([]);
-
+  const [menudata, setmenudata] = useState([]);
   const value = {
+    menudata,
+    setmenudata,
     requests,
     setRequests,
-    documents,
-    setDocuments,
+    reports,
+    setReports,
     notifications,
     setNotifications,
     tasks,
@@ -22,5 +25,9 @@ export const DataProvider = ({ children }) => {
     setClosedTasks,
   };
 
-  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
+  return (
+    <DataContext.Provider value={(isAuthenticated, setIsAuthenticated, value)}>
+      {children}
+    </DataContext.Provider>
+  );
 };

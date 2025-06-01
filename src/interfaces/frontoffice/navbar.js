@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const [roles, setRoles] = useState([]);
   const [isScrolled, setIsScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  const handleClickTasks = () => navigate("/tasks");
+  const handleClickNotifications = () => navigate("/notification");
+  const handleClickRequests = () => navigate("/request");
+  const handleClickReports = () => navigate("/report");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,30 +65,34 @@ const Navbar = () => {
 
   return (
     <div>
-      <div
-        className={`navbar sticky top-0 z-50 transition-all duration-300 ${
+      <nav
+        className={`sticky top-0 z-50 transition-all duration-300 flex items-center px-4 py-2 ${
           isScrolled ? "bg-transparent" : "bg-neutral"
         }`}
       >
-        <div className="flex-1">
-          <a href="/upload">
-            <img
-              src="/images/logosopra.png"
-              alt="Logo"
-              className="btn btn-warning btn-ghost text-xl"
-            />
+        {/* Left: Logo */}
+        <div className="flex-none">
+          <a href="/upload" className="btn btn-warning btn-ghost text-xl p-0">
+            <img src="/images/logosopra.png" alt="Logo" className="h-10" />
           </a>
         </div>
-        <div className="flex gap-2  items-center">
-          {/* Paper Plane Icon */}
-          <button className="btn btn-square btn-ghost btn-warning">
+
+        {/* Spacer */}
+        <div className="flex-1"></div>
+
+        {/* Icon buttons */}
+        <div className="flex gap-2 items-center">
+          <button
+            className="btn btn-square btn-ghost btn-warning"
+            onClick={handleClickRequests}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth="2.5"
               stroke="white"
-              className="size-[1.2em]"
+              className="w-6 h-6"
             >
               <path
                 strokeLinecap="round"
@@ -95,71 +106,78 @@ const Navbar = () => {
               />
             </svg>
           </button>
-
-          {/* Bell Icon */}
-          <button className="btn btn-square btn-ghost btn-warning">
+          <button
+            className="btn btn-square btn-ghost btn-warning"
+            onClick={handleClickNotifications}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth="2.5"
               stroke="white"
-              className="size-[1.2em]"
+              className="w-6 h-6"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11
-         c0-3.038-1.343-5.443-4-5.917V4a2 2 0 00-4 0v1.083
-         C7.343 5.557 6 7.962 6 11v3.159c0 .538-.214 1.055-.595
-         1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              c0-3.038-1.343-5.443-4-5.917V4a2 2 0 00-4 0v1.083
+              C7.343 5.557 6 7.962 6 11v3.159c0 .538-.214 1.055-.595
+              1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
               />
             </svg>
           </button>
-
-          {/* Message Icon (Envelope) */}
-          <button className="btn btn-square btn-ghost btn-warning">
+          <button
+            className="btn btn-square btn-ghost btn-warning"
+            onClick={handleClickTasks}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth="2.5"
               stroke="white"
-              className="size-[1.2em]"
+              className="w-6 h-6"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M21.75 6.75v10.5A2.25 2.25 0 0119.5
-        19.5h-15a2.25 2.25 0 01-2.25-2.25V6.75m0
-        0l9 6.75 9-6.75m-18 0A2.25 2.25 0 014.5
-        4.5h15a2.25 2.25 0 012.25 2.25"
+              19.5h-15a2.25 2.25 0 01-2.25-2.25V6.75m0
+              0l9 6.75 9-6.75m-18 0A2.25 2.25 0 014.5
+              4.5h15a2.25 2.25 0 012.25 2.25"
               />
             </svg>
           </button>
-
-          {/* Document Icon */}
-          <button className="btn btn-square btn-ghost btn-warning">
+          <button
+            className="btn btn-square btn-ghost btn-warning"
+            onClick={handleClickReports}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth="2.5"
               stroke="white"
-              className="size-[1.2em]"
+              className="w-6 h-6"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M9 12h6m-6 4h6m2 4H7a2 2 0
-        01-2-2V6a2 2 0 012-2h7l5
-        5v11a2 2 0 01-2 2z"
+              01-2-2V6a2 2 0 012-2h7l5
+              5v11a2 2 0 01-2 2z"
               />
             </svg>
           </button>
         </div>
 
-        <div className="flex gap-2 items-center">
+        {/* Divider */}
+        <div className="mx-4 w-px h-6 bg-gray-400 opacity-40"></div>
+
+        {/* Mes Rôles + Avatar */}
+        <div className="flex items-center gap-2">
           <div className="relative" ref={dropdownRef}>
             <button
               className="btn btn-warning btn-ghost text-white text-xs"
@@ -215,7 +233,7 @@ const Navbar = () => {
             </ul>
           </div>
         </div>
-      </div>
+      </nav>
     </div>
   );
 };

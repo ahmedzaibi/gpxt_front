@@ -1,23 +1,25 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { DataContext } from "../context/DataContext";
+import { useContext } from "react";
+
+import { DataContext } from "../../context/DataContext";
 
 export default function Login() {
+  const {
+    setmenudata,
+    setReports,
+    setRequests,
+    setNotifications,
+    setTasks,
+    setClosedTasks,
+  } = useContext(DataContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [language, setLanguage] = useState("fr");
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
-
-  const {
-    setRequests,
-    setDocuments,
-    setNotifications,
-    setTasks,
-    setClosedTasks,
-  } = useContext(DataContext);
 
   useEffect(() => {
     const savedUsername = localStorage.getItem("rememberedEmail");
@@ -73,44 +75,57 @@ export default function Login() {
             "current-user-ss",
             JSON.stringify(currentRole)
           );
+          console.log("Stored currentRole:", currentRole);
 
           const roleParam = encodeURIComponent(currentRole["@name"]);
+          const apiEndpoints = {
+            requests: `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/requests?role=${roleParam}`,
+            notifications: `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/notifications?role=${roleParam}`,
+            tasks: `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/tasks?role=${roleParam}`,
+            reports: `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/query?role=${roleParam}`,
+            closedTasks: `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/closedtasks?role=${roleParam}`,
+          };
+          const fetchAllData = async () => {
+            try {
+              const [
+                requestsRes,
+                notificationsRes,
+                tasksRes,
+                reportsRes,
+                closedTasksRes,
+              ] = await Promise.all(
+                Object.values(apiEndpoints).map((url) =>
+                  axios.get(url, { withCredentials: true })
+                )
+              );
+              setReports(reportsRes.data.query || []);
+              setRequests(requestsRes.data.request || []);
+              setNotifications(notificationsRes.data.notification || []);
+              setTasks(tasksRes.data.task || []);
+              setClosedTasks(closedTasksRes.data.closedTask || []);
+
+              console.log("All API data saved.");
+            } catch (error) {
+              console.error("Error fetching post-login data:", error);
+            }
+          };
+
+          // Call it right after gpmenu
+          await fetchAllData();
           const result = await axios.get(
             `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/gpmenu?path=employee&role=${roleParam}`,
             {
               withCredentials: true,
             }
           );
-
-          // Optional logging
-          console.log("Initial data:", result.data);
+          const menudata = result.data.topic;
+          setmenudata(menudata || []);
+          console.log("Initial data:", result.data.topic);
+        } else {
+          console.warn("No valid current role found to make API call.");
         }
 
-        // Set up Authorization header
-        if (data.token) {
-          axios.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${data.token}`;
-        }
-
-        // Fetch data to populate context
-        const [reqs, docs, notifs, taskOpen, taskClosed] = await Promise.all([
-          axios.get("/api/requests"),
-          axios.get("/api/documents"),
-          axios.get("/api/notifications"),
-          axios.get("/api/tasks"),
-          axios.get("/api/closedTasks"),
-        ]);
-
-        // Save in context
-        setRequests(reqs.data.list || []);
-        setDocuments(docs.data.list || []);
-        setNotifications(notifs.data.list || []);
-        setTasks(taskOpen.data.list || []);
-        setClosedTasks(taskClosed.data.list || []);
-
-        // Navigate to dashboard
-        navigate("/dashboard");
+        navigate("/upload?justLoggedIn=true");
       } else {
         setError(data.message || "Invalid credentials");
       }
