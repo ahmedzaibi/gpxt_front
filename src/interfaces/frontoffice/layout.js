@@ -1,57 +1,30 @@
 import {
-  UserCircleIcon,
-  DocumentArrowUpIcon,
-  NumberedListIcon,
+  AcademicCapIcon,
+  CalendarDaysIcon,
+  ClockIcon,
+  ChartBarIcon,
+  ShieldCheckIcon,
+  ClipboardDocumentListIcon,
+  PresentationChartLineIcon,
+  InboxIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
+
 import { useContext } from "react";
 import { DataContext } from "../../context/DataContext";
 import Navbar from "./navbar";
 import Footer from "./footer";
-const generateMenuItems = (menuList) => {
-  return menuList.map((item, index) => {
-    const label = item["@label"] || `Item ${index}`;
 
-    // Extract submenu items using your logic
-    const subMenuItems = (item.functionalAction || [])
-      .map((action) => {
-        const firstImpl = action.functionalActionImplementation?.[0];
-        return firstImpl?.["@label"] || null;
-      })
-      .filter(Boolean); // Remove nulls
-
-    if (subMenuItems.length > 0) {
-      return (
-        <li key={index}>
-          <details>
-            <summary className="hover:bg-gray-800 rounded-md px-2 py-1">
-              {label}
-            </summary>
-            <ul>
-              {subMenuItems.map((sub, subIndex) => (
-                <li key={subIndex}>
-                  <a className="hover:bg-gray-700 rounded-md px-2 py-1">
-                    {sub}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </details>
-        </li>
-      );
-    }
-
-    return (
-      <li key={index}>
-        <a className="hover:bg-gray-800 rounded-md px-2 py-1">{label}</a>
-      </li>
-    );
-  });
-};
-// Optional: map icon names to actual icons
 const iconMap = {
-  profile: <UserCircleIcon className="h-6 w-6" />,
-  upload: <DocumentArrowUpIcon className="h-6 w-6" />,
-  list: <NumberedListIcon className="h-6 w-6" />,
+  PAD: AcademicCapIcon,
+  ABS: CalendarDaysIcon,
+  GTA: ClockIcon,
+  GAF: ChartBarIcon,
+  RSK: ShieldCheckIcon,
+  SKL: ClipboardDocumentListIcon,
+  TRA: PresentationChartLineIcon,
+  SRQ: InboxIcon,
+  ASS: UserGroupIcon,
 };
 
 const Layout = ({ children }) => {
@@ -60,11 +33,10 @@ const Layout = ({ children }) => {
   const generateMenuItems = (menuList) => {
     return menuList.map((item, index) => {
       const label = item["@label"] || `Item ${index}`;
-      const iconKey = item.icon || "profile";
-      const icon = iconMap[iconKey] || <UserCircleIcon className="h-6 w-6" />;
+      const iconKey = item["@name"];
+      const IconComponent = iconMap[iconKey] || AcademicCapIcon; // fallback icon
       const path = item.path || "#";
 
-      // Normalize functionalAction to always be an array
       const actions = Array.isArray(item.functionalAction)
         ? item.functionalAction
         : item.functionalAction
@@ -78,20 +50,23 @@ const Layout = ({ children }) => {
             : action.functionalActionImplementation;
           return firstImpl?.["@label"] || null;
         })
-        .filter(Boolean); // remove nulls
+        .filter(Boolean);
 
       if (subMenuItems.length > 0) {
         return (
           <li key={index}>
             <details>
-              <summary className="hover:bg-gray-800 rounded-md flex items-center">
-                {icon}
+              <summary className="hover:bg-gray-800 rounded-md flex items-center px-2 py-1">
+                <IconComponent className="h-6 w-6" />
                 <span className="ml-2 hidden group-hover:inline">{label}</span>
               </summary>
               <ul>
                 {subMenuItems.map((subLabel, subIndex) => (
                   <li key={subIndex}>
-                    <a className="hover:bg-gray-700 rounded-md px-2 py-1">
+                    <a
+                      href="/upload"
+                      className="hover:bg-gray-700 rounded-md px-2 py-1"
+                    >
                       {subLabel}
                     </a>
                   </li>
@@ -106,9 +81,9 @@ const Layout = ({ children }) => {
         <li key={index}>
           <a
             href={path}
-            className="hover:bg-gray-800 rounded-md flex items-center"
+            className="hover:bg-gray-800 rounded-md flex items-center px-2 py-1"
           >
-            {icon}
+            <IconComponent className="h-6 w-6" />
             <span className="ml-2 hidden group-hover:inline">{label}</span>
           </a>
         </li>
