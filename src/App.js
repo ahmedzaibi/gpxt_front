@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./interfaces/login/Login";
 import XMLUploader from "./interfaces/upload/XMLUploader";
+import Chatbot from "./interfaces/frontoffice/chatbot";
 import FormRenderer from "./components/FormRenderer";
 import PrivateRoute from "../src/interfaces/login/PrivateRoute";
 import Logout from "./interfaces/login/Logout";
@@ -27,6 +28,7 @@ function App() {
             <Route path="/Profile" element={<ProfileGPX />} />
             <Route path="/Users" element={<UserList />} />
             <Route path="/XmlFormList" element={<XmlFormsList />} />
+            <Route path="/chatbot" element={<Chatbot />} />
             <Route path="/tasks" element={<TaskList />} />
             <Route path="/request" element={<RequestList />} />
             <Route path="/tasks" element={<TaskList />} />

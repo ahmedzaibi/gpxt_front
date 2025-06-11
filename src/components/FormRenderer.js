@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import HRINFODATAGRID from "./HRINFODATAGRID.jsx";
 import HRITEM from "./HRITEM";
 import HRTEXT from "./HRTEXT";
 import HROUTPUT from "./HROUTPUT.jsx";
@@ -19,6 +20,7 @@ const FormRenderer = () => {
 
     const parser = new DOMParser();
     const definedlm = {
+      HRINFODATAGRID: HRINFODATAGRID,
       HRPAGE: HRPAGE,
       HRITEM: HRITEM,
       HRTEXT: HRTEXT,

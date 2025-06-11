@@ -96,7 +96,6 @@ export default function RequestList() {
                   <th className="px-4 py-2 border-b border-white/30">
                     Beneficiary
                   </th>
-
                   <th className="px-4 py-2 border-b border-white/30">
                     Start Date
                   </th>
@@ -109,11 +108,9 @@ export default function RequestList() {
                     className="hover:bg-white/10 transition-colors border-t border-white/10"
                   >
                     <td className="px-4 py-2">{request["@label"] || "N/A"}</td>
-
                     <td className="px-4 py-2">
                       {request["@recipient"] || "N/A"}
                     </td>
-
                     <td className="px-4 py-2">{request["@status"] || "N/A"}</td>
                     <td className="px-4 py-2">
                       {request["@startDate"] || "N/A"}

@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useContext } from "react";
-
 import { DataContext } from "../../context/DataContext";
 
 export default function Login() {
@@ -35,7 +33,7 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/login",
+        "http://localhost:8181/https://tnhldapp0144.interpresales.mysoprahronline.com/hr-business-services-rest/business-services/login",
         {
           username,
           password,
@@ -66,25 +64,25 @@ export default function Login() {
           localStorage.removeItem("rememberedEmail");
         }
 
-        const currentRole = data.roles.role?.find(
-          (role) => role["@category"] !== "HRREP"
-        );
-
+        //const currentRole = data.roles.role?.find(
+        //(role) => role["@category"] !== "HRREP"
+        //);
+        const currentRole = data.roles.role;
         if (currentRole) {
           sessionStorage.setItem(
             "current-user-ss",
             JSON.stringify(currentRole)
           );
-          console.log("Stored currentRole:", currentRole);
-
           const roleParam = encodeURIComponent(currentRole["@name"]);
+
           const apiEndpoints = {
-            requests: `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/requests?role=${roleParam}`,
-            notifications: `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/notifications?role=${roleParam}`,
-            tasks: `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/tasks?role=${roleParam}`,
-            reports: `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/query?role=${roleParam}`,
-            closedTasks: `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/closedtasks?role=${roleParam}`,
+            requests: `http://localhost:8181/https://tnhldapp0144.interpresales.mysoprahronline.com/hr-business-services-rest/business-services/requests?role=${roleParam}`,
+            notifications: `http://localhost:8181/https://tnhldapp0144.interpresales.mysoprahronline.com/hr-business-services-rest/business-services/notifications?role=${roleParam}`,
+            tasks: `http://localhost:8181/https://tnhldapp0144.interpresales.mysoprahronline.com/hr-business-services-rest/business-services/tasks?role=${roleParam}`,
+            reports: `http://localhost:8181/https://tnhldapp0144.interpresales.mysoprahronline.com/hr-business-services-rest/business-services/query?role=${roleParam}`,
+            closedTasks: `http://localhost:8181/https://tnhldapp0144.interpresales.mysoprahronline.com/hr-business-services-rest/business-services/closedtasks?role=${roleParam}`,
           };
+
           const fetchAllData = async () => {
             try {
               const [
@@ -103,26 +101,20 @@ export default function Login() {
               setNotifications(notificationsRes.data.notification || []);
               setTasks(tasksRes.data.task || []);
               setClosedTasks(closedTasksRes.data.closedTask || []);
-
-              console.log("All API data saved.");
             } catch (error) {
               console.error("Error fetching post-login data:", error);
             }
           };
 
-          // Call it right after gpmenu
           await fetchAllData();
+
           const result = await axios.get(
-            `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/gpmenu?path=employee&role=${roleParam}`,
-            {
-              withCredentials: true,
-            }
+            `http://localhost:8181/https://tnhldapp0144.interpresales.mysoprahronline.com/hr-business-services-rest/business-services/gpmenu?path=employee&role=${roleParam}`,
+            { withCredentials: true }
           );
+
           const menudata = result.data.topic;
           setmenudata(menudata || []);
-          console.log("Initial data:", result.data.topic);
-        } else {
-          console.warn("No valid current role found to make API call.");
         }
 
         navigate("/upload?justLoggedIn=true");
@@ -136,39 +128,49 @@ export default function Login() {
   };
 
   return (
-    <section className="min-h-screen flex items-stretch text-white">
-      <div
-        className="lg:flex w-1/2 hidden bg-no-repeat bg-center bg-cover relative items-center"
-        style={{ backgroundImage: "url(/images/bg_login.png)" }}
-      >
-        <div className="absolute bg-black opacity-60 "></div>
+    <section className="min-h-screen flex items-stretch text-white relative">
+      {/* Left side with background video */}
+      <div className="lg:flex w-1/2 hidden relative items-center overflow-hidden">
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+        >
+          <source src="/images/logo_video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       </div>
 
+      {/* Right side with form */}
       <div
         className="lg:w-1/2 w-full flex items-center justify-center text-center md:px-16 px-0 z-0"
-        style={{ backgroundColor: "#161616" }}
+        style={{
+          background:
+            "linear-gradient(to left, rgba(8, 12, 20, 0.9) 0%, rgba(2, 5, 12, 1) 100%)",
+          backdropFilter: "blur(3px)",
+        }}
       >
-        <div
-          className="absolute lg:hidden z-10 inset-0 bg-no-repeat bg-center bg-cover items-center"
-          style={{ backgroundImage: "url(/images/bg_login.png)" }}
-        >
+        {/* Mobile video background */}
+        <div className="absolute lg:hidden z-10 inset-0 overflow-hidden">
+          <video
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+          >
+            <source src="/images/logo_video.mp4" type="video/mp4" />
+          </video>
           <div className="absolute bg-black opacity-60 inset-0 z-0"></div>
         </div>
 
+        {/* Login content */}
         <div className="w-full py-6 z-20">
-          <div className="w-full z-10 flex items-center justify-end">
-            <h1
-              className="text-2xl font-semibold tracking-wide pl-2 hover:text-[#FFCA23]"
-              style={{
-                fontFamily: "Hurme Geometric Sans 3, sans-serif",
-                fontWeight: 300,
-              }}
-            >
-              Together, we shape the future.
-            </h1>
+          <div className="w-full z-10 flex justify-center ">
             <img src="/images/logosopra.png" alt="Logo" className="h-16" />
           </div>
-
           <div className="py-6 space-x-2"></div>
 
           {error && (

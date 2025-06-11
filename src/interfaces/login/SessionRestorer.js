@@ -1,4 +1,3 @@
-// src/components/SessionRestorer.js
 import { useEffect, useContext, useRef } from "react";
 import { DataContext } from "../../context/DataContext";
 import axios from "axios";
@@ -27,7 +26,7 @@ const SessionRestorer = () => {
     const roleParam = encodeURIComponent(currentRole["@name"]);
 
     const baseUrl =
-      "http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services";
+      "http://localhost:8181/https://tnhldapp0144.interpresales.mysoprahronline.com/hr-business-services-rest/business-services";
 
     const endpoints = {
       requests: `${baseUrl}/requests?role=${roleParam}`,

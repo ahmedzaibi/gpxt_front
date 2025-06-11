@@ -8,7 +8,10 @@ export default function TaskList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
-  if (!tasks || tasks.length === 0) {
+  // Normalize tasks to always be an array
+  const normalizedTasks = Array.isArray(tasks) ? tasks : tasks ? [tasks] : [];
+
+  if (normalizedTasks.length === 0) {
     return (
       <Layout>
         <div className="text-white text-center mt-10">Loading tasks...</div>
@@ -17,7 +20,7 @@ export default function TaskList() {
   }
 
   // Filter tasks based on search term
-  const filteredTasks = tasks.filter((task) =>
+  const filteredTasks = normalizedTasks.filter((task) =>
     task["@label"]?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

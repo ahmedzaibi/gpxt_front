@@ -26,10 +26,14 @@ const Navbar = () => {
       const stored = sessionStorage.getItem("allUsers");
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed && Array.isArray(parsed.role)) {
-          const filtered = parsed.role.filter(
+        if (parsed && parsed.role) {
+          const rolesArray = Array.isArray(parsed.role)
+            ? parsed.role
+            : [parsed.role];
+          const filtered = rolesArray.filter(
             (role) => role["@category"] !== "HRREP"
           );
+
           setRoles(filtered);
           if (
             filtered.length > 0 &&

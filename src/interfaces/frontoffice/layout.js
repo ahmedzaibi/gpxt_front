@@ -34,7 +34,7 @@ const Layout = ({ children }) => {
     return menuList.map((item, index) => {
       const label = item["@label"] || `Item ${index}`;
       const iconKey = item["@name"];
-      const IconComponent = iconMap[iconKey] || AcademicCapIcon; // fallback icon
+      const IconComponent = iconMap[iconKey] || AcademicCapIcon;
       const path = item.path || "#";
 
       const actions = Array.isArray(item.functionalAction)
