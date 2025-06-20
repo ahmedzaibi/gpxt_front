@@ -240,6 +240,15 @@ export default function Login() {
                 >
                   Sign in
                 </button>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/cp")}
+                    className="w-full text-sm text-white underline hover:text-gray-300 transition"
+                  >
+                    Changer le mot de passe
+                  </button>
+                </div>
               </div>
             </form>
           </div>

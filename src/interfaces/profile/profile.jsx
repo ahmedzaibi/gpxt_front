@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
 import Layout from "../frontoffice/layout";
 
 const Profile = () => {
@@ -16,77 +15,45 @@ const Profile = () => {
     language: "",
     roles: [],
     photo: "",
+    hasPhoto: false,
   });
-  const [profileImage, setProfileImage] = useState(null);
 
+  const [profileImage, setProfileImage] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserData = async (nudoss) => {
-    const token = localStorage.getItem("token");
-    try {
-      const response = await fetch(`http://localhost:8080/users/${nudoss}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUserData(data);
-
-        // Load profile image if available
-        const storedImage = localStorage.getItem(`profileImage-${nudoss}`);
-        if (storedImage) setProfileImage(storedImage);
-      } else {
-        console.error("Failed to fetch user data");
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
-
   useEffect(() => {
     const loadUser = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        window.location.href = "/login";
+      const storedData = JSON.parse(sessionStorage.getItem("current-user-ss"));
+      if (!storedData) {
+        window.location.href = "/logout";
         return;
       }
-      const decoded = jwtDecode(token);
-      const nudoss = decoded.Nudoss || "";
-      await fetchUserData(nudoss);
+
+      setUserData((prev) => ({
+        ...prev,
+        ...storedData,
+      }));
+
+      const image = localStorage.getItem(`profileImage-${storedData.nudoss}`);
+      if (image) {
+        setProfileImage(image);
+      }
+
       setLoading(false);
     };
+
     loadUser();
   }, []);
 
-  const handleSave = async (e) => {
+  const handleSave = (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
-    try {
-      const response = await fetch(
-        `http://localhost:8080/users/updateUser/${userData.nudoss}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(userData),
-        }
-      );
-
-      if (response.ok) {
-        if (profileImage) {
-          localStorage.setItem(`profileImage-${userData.nudoss}`, profileImage);
-        }
-        await fetchUserData(userData.nudoss);
-        setEditMode(false);
-      } else {
-        console.error("Failed to update user:", response.status);
-        alert("Erreur lors de la mise à jour du profil.");
-      }
-    } catch (error) {
-      console.error("Error updating user:", error);
+    const updatedData = { ...userData };
+    localStorage.setItem("data", JSON.stringify(updatedData));
+    if (profileImage) {
+      localStorage.setItem(`profileImage-${userData.nudoss}`, profileImage);
     }
+    setEditMode(false);
   };
 
   if (loading) return <p>Loading...</p>;
@@ -149,6 +116,10 @@ const Profile = () => {
                     { label: "First Name", key: "firstname" },
                     { label: "Last Name", key: "lastname" },
                     { label: "Phone Number", key: "phonenumber" },
+                    { label: "Email", key: "email" },
+                    { label: "Matcle", key: "matcle" },
+                    { label: "Soccle", key: "soccle" },
+                    { label: "Language", key: "language" },
                   ].map((field) => (
                     <div key={field.key}>
                       <label className="block mb-1 text-white/80">
@@ -157,7 +128,7 @@ const Profile = () => {
                       <input
                         type="text"
                         name={field.key}
-                        value={userData[field.key]}
+                        value={userData[field.key] || ""}
                         onChange={(e) =>
                           setUserData({
                             ...userData,
@@ -190,9 +161,9 @@ const Profile = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto text-left">
                   {[
+                    { label: "Username", key: "username" },
                     { label: "First Name", key: "firstname" },
                     { label: "Last Name", key: "lastname" },
-                    { label: "Username", key: "username" },
                     { label: "Phone Number", key: "phonenumber" },
                     { label: "Email", key: "email" },
                     { label: "Matcle", key: "matcle" },
@@ -204,7 +175,7 @@ const Profile = () => {
                         {field.label}
                       </label>
                       <p className="bg-white/10 p-2 rounded-md">
-                        {userData[field.key]}
+                        {userData[field.key] || "N/A"}
                       </p>
                     </div>
                   ))}
@@ -214,7 +185,7 @@ const Profile = () => {
                   <button
                     type="button"
                     onClick={() => setEditMode(true)}
-                    className="bg-[#] btn btn-ghost px-4 py-2 rounded-md"
+                    className="bg-gray-700 hover:bg-gray-800 px-4 py-2 rounded-md"
                   >
                     Modifier
                   </button>

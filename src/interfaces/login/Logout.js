@@ -13,7 +13,7 @@ const Logout = () => {
 
       try {
         await axios.get(
-          `http://localhost:8181/http://dlnxhradev02.ptx.fr.sopra:37522/hr-business-services-rest/business-services/logout`,
+          `http://localhost:8181/https://tnhldapp0144.interpresales.mysoprahronline.com//hr-business-services-rest/business-services/logout`,
 
           {
             withCredentials: true,

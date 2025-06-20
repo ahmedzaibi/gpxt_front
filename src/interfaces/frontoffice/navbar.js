@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 const Navbar = () => {
   const navigate = useNavigate();
   const [roles, setRoles] = useState([]);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -12,14 +11,6 @@ const Navbar = () => {
   const handleClickNotifications = () => navigate("/notification");
   const handleClickRequests = () => navigate("/request");
   const handleClickReports = () => navigate("/report");
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     try {
@@ -70,15 +61,18 @@ const Navbar = () => {
   return (
     <div>
       <nav
-        className={`sticky top-0 z-50 transition-all duration-300 flex items-center px-4 py-2 ${
-          isScrolled ? "bg-transparent" : "bg-neutral"
-        }`}
+        className={`sticky top-0 z-50 transition-all duration-300 flex items-center px-4 py-2 ease-in-out bg-white/10 backdrop-blur-sm text-white h-full`}
       >
-        {/* Left: Logo */}
-        <div className="flex-none">
-          <a href="/upload" className="btn btn-warning btn-ghost text-xl p-0">
+        <div className="flex-none flex items-center gap-3">
+          <button href="#" className="btn btn-warning btn-ghost text-xl p-0">
             <img src="/images/logosopra.png" alt="Logo" className="h-10" />
-          </a>
+          </button>
+          <button
+            className="btn btn-warning btn-ghost text-white text-xs"
+            onClick={() => navigate("/upload")}
+          >
+            Télécharger étapes
+          </button>
         </div>
 
         {/* Spacer */}
@@ -190,7 +184,7 @@ const Navbar = () => {
               Mes Rôles
             </button>
             {dropdownOpen && (
-              <ul className="absolute right-0 p-2 shadow menu dropdown-content bg-base-100 rounded-box w-64 mt-2 z-50">
+              <ul className="absolute right-0 p-2 shadow menu dropdown-content bg-base-100 rounded-box w-64 mt-2 z-50 text-[#7E00B5]">
                 {roles.map((role, index) => (
                   <li key={index}>
                     <a
@@ -226,7 +220,7 @@ const Navbar = () => {
             </div>
             <ul
               tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box mt-3 w-52 p-2 shadow"
+              className="menu menu-sm dropdown-content bg-base-100 rounded-box mt-3 w-52 p-2 shadow text-black"
             >
               <li>
                 <a href="/Profile">Profile</a>

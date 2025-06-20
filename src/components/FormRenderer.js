@@ -8,6 +8,7 @@ import HREDIT from "./HREDIT.jsx";
 import HRCOMBO from "./HRCOMBO.jsx";
 import HRPAGE from "./HRPAGE.jsx";
 import Layout from "../interfaces/frontoffice/layout.js";
+import HRBLOB from "./HRBLOB.jsx";
 const FormRenderer = () => {
   const location = useLocation();
   const xmlData = location.state?.xmlData;
@@ -17,136 +18,92 @@ const FormRenderer = () => {
 
   useEffect(() => {
     if (!xmlData) return;
-
     const parser = new DOMParser();
-    const definedlm = {
-      HRINFODATAGRID: HRINFODATAGRID,
-      HRPAGE: HRPAGE,
-      HRITEM: HRITEM,
-      HRTEXT: HRTEXT,
-      HROUTPUT: HROUTPUT,
-      HREDIT: HREDIT,
-      HRCOMBO: HRCOMBO,
+    const xmlDoc = parser.parseFromString(xmlData, "text/xml");
+    const defined = {
+      HRINFODATAGRID,
+      HRPAGE,
+      HRITEM,
+      HRTEXT,
+      HROUTPUT,
+      HREDIT,
+      HRCOMBO,
+      HRBLOB,
     };
 
-    const xmlDoc = parser.parseFromString(xmlData, "text/xml");
+    const hrpage = xmlDoc.querySelector("OBJECT");
+    if (hrpage) setLabelNode(hrpage.getAttribute("Label") || "");
 
-    const hrpageLabelnode = xmlDoc.querySelector("OBJECT");
-
-    const getChildren = (nodes) => {
-      const children = [];
-      nodes.forEach((child) => {
-        if (
-          child.nodeType === Node.ELEMENT_NODE &&
-          Object.keys(definedlm).includes(child.tagName)
-        ) {
-          if (child.tagName === "HREDIT" || child.tagName === "HRCOMBO") {
+    const walk = (nodes) => {
+      const arr = [];
+      nodes.forEach((n) => {
+        if (n.nodeType === Node.ELEMENT_NODE && defined[n.tagName]) {
+          if (["HREDIT", "HRCOMBO", "HRBLOB"].includes(n.tagName))
             setShowSaveButton(true);
-          }
 
-          let elemChildren = [];
-          if (child.hasChildNodes) {
-            elemChildren = getChildren(child.childNodes);
-          }
-
-          const elem = React.createElement(definedlm[child.tagName], {
-            node: child,
-            children: elemChildren,
+          const children = walk(n.childNodes);
+          const Elem = React.createElement(defined[n.tagName], {
+            node: n,
+            children,
           });
-          children.push(elem);
-        } else if (
-          child.nodeType === Node.ELEMENT_NODE &&
-          !Object.keys(definedlm).includes(child.tagName)
-        ) {
-          children.push(...getChildren(child.childNodes));
+          arr.push(Elem);
+        } else if (n.nodeType === Node.ELEMENT_NODE) {
+          arr.push(...walk(n.childNodes));
         }
       });
-      return children;
+      return arr;
     };
 
-    const parseComponents = () => {
-      const parsed = [];
-      const node = xmlDoc.getElementsByTagName("HRPAGE")[0];
-      const children = getChildren(node.childNodes);
-      const elem = React.createElement(definedlm[node.tagName], {
-        node,
-        children,
-      });
-      parsed.push(elem);
-      setComponents(parsed);
-    };
-
-    parseComponents();
-
-    if (hrpageLabelnode) {
-      const label = hrpageLabelnode.getAttribute("Label");
-      setLabelNode(label);
-
-      // Send the API request with label and file
-      const formData = new FormData();
-      const blob = new Blob([xmlData], { type: "text/xml" });
-
-      formData.append("label", label);
-      formData.append("file", blob, `${label || "form"}.xml`);
-
-      fetch("http://localhost:8080/api/forms/upload", {
-        method: "POST",
-        body: formData,
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("form saving failed");
-          return res.text();
-        })
-        .then((text) => {
-          console.log("✅ Form saved:", text);
-        })
-        .catch((err) => {
-          console.error("❌ form saving error:", err);
-        });
+    const page = xmlDoc.getElementsByTagName("HRPAGE")[0];
+    if (page) {
+      const comp = walk(page.childNodes);
+      setComponents([
+        React.createElement(defined.HRPAGE, { node: page, children: comp }),
+      ]);
     }
   }, [xmlData]);
 
   const handleSave = () => {
-    const container = document.querySelector(".relative.bg-gray-50");
-    if (!container) return;
-
-    const inputs = container.querySelectorAll(
-      "input[data-id], select[data-id]"
-    );
-    const values = {};
-    inputs.forEach((input) => {
-      values[input.getAttribute("data-id")] = input.value;
+    const inputs = document.querySelectorAll("input[data-id], select[data-id]");
+    const vals = {};
+    inputs.forEach((i) => {
+      const id = i.getAttribute("data-id");
+      if (i.type === "file" && i.files[0]) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          vals[id] = reader.result;
+          localStorage.setItem("formData", JSON.stringify(vals));
+          alert("Form data saved!");
+        };
+        reader.readAsDataURL(i.files[0]);
+      } else {
+        vals[id] = i.value;
+      }
     });
 
-    localStorage.setItem("formData", JSON.stringify(values));
-    alert("Form data saved to localStorage!");
+    // If no file input exists, save immediately
+    const hasFile = Array.from(inputs).some(
+      (i) => i.type === "file" && i.files[0]
+    );
+    if (!hasFile) {
+      localStorage.setItem("formData", JSON.stringify(vals));
+      alert("Form data saved!");
+    }
   };
 
   return (
     <Layout>
-      <div
-        className="flex items-center justify-center min-h-screen bg-cover bg-center pt-32"
-        style={{
-          backgroundImage: `url('/images/bg_login.png')`,
-          backgroundSize: "cover",
-          backgroundPosition: "90% 36%",
-        }}
-      >
-        <div className="w-full max-w-6xl p-16 shadow-xl  rounded-lg">
+      <div className="flex items-center justify-center min-h-screen pt-32">
+        <div className="w-full max-w-6xl p-16 shadow-xl rounded-lg">
           <h2 className="text-3xl font-bold mb-6 text-center text-white">
             {labelNode}
           </h2>
           <div
             className="relative w-full max-w-4xl px-6 py-20 bg-white/10 backdrop-blur-md rounded-3xl shadow-lg border border-white/20 text-white"
-            style={{
-              width: "100%",
-              position: "relative",
-              minHeight: "400px",
-            }}
+            style={{ minHeight: "400px" }}
           >
             {components[0]}
           </div>
-
           {showSaveButton && (
             <div className="mt-6 text-center">
               <button

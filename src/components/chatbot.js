@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Groq from "groq-sdk";
 const groq = new Groq({
-  apiKey: "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",
+  apiKey: "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",
   dangerouslyAllowBrowser: true,
 });
 export default function Chatbot() {
@@ -53,7 +53,6 @@ export default function Chatbot() {
 
   return (
     <div className="max-w-md mx-auto p-4 border rounded-xl shadow-lg">
-      <h2 className="text-xl font-bold mb-4">Simple Chatbot</h2>
       <div className="h-64 overflow-y-auto border p-2 mb-4 bg-gray-50 rounded">
         {messages.map((msg, idx) => (
           <div
@@ -82,7 +81,7 @@ export default function Chatbot() {
 
       <div className="flex gap-2">
         <input
-          className="flex-1 border p-2 rounded"
+          className="flex-1 border p-2 rounded text-black"
           placeholder="Type your message..."
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -90,7 +89,7 @@ export default function Chatbot() {
         />
         <button
           onClick={sendMessage}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="btn btn-square btn-ghost btn-warning"
           disabled={loading}
         >
           Send

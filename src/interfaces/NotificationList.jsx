@@ -47,14 +47,7 @@ export default function NotificationList() {
 
   return (
     <Layout>
-      <div
-        className="flex items-center justify-center min-h-screen bg-cover bg-center pt-32"
-        style={{
-          backgroundImage: "url('/images/bg_login.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "90% 36%",
-        }}
-      >
+      <div className="flex items-center justify-center min-h-screen bg-cover bg-center pt-32">
         <div className="relative w-full max-w-5xl px-6 py-12 bg-white/10 backdrop-blur-md rounded-3xl shadow-lg border border-white/20 text-white">
           <h2 className="text-center text-3xl font-bold mb-2">Notifications</h2>
 
