@@ -1,6 +1,9 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "GPXT",
+  "name": "Guided Process Xml Transformer",
+  "description": "Manage your HR requests and guided processes with automation.",
+  "start_url": ".",
+  "display": "standalone",
   "icons": [
     {
       "src": "favicon.ico",

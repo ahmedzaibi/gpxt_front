@@ -1,17 +1,91 @@
 import { useContext, useState } from "react";
 import Layout from "../interfaces/frontoffice/layout";
 import { DataContext } from "../context/DataContext";
+import axios from "axios";
 
 export default function RequestList() {
   const { requests } = useContext(DataContext);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [processingId, setProcessingId] = useState(null);
+  const currentRole = JSON.parse(sessionStorage.getItem("current-user-ss"));
 
-  if (!requests || requests.length === 0) {
+  const API_BASE_URL =
+    "http://localhost:8181/https://tnhldapp0144.interpresales.mysoprahronline.com/hr-business-services-rest/business-services";
+  const ROLE_PARAM = encodeURIComponent(currentRole["@name"]);
+
+  const handleCancelRequest = async (request) => {
+    setProcessingId(request["@id"]);
+    const payload = {
+      cancelRequests: [
+        {
+          "@gpId": request["@gpID"],
+          "@nudoss": request["@id"],
+        },
+      ],
+    };
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/cancel/requests?role=${ROLE_PARAM}`,
+        payload,
+        { withCredentials: true }
+      );
+      if (response.data?.status === "OK") {
+        alert("Request successfully cancelled!");
+        window.location.reload();
+      } else {
+        throw new Error("API responded with an error.");
+      }
+    } catch (err) {
+      console.error("Error canceling request:", err);
+      alert("An error occurred while canceling the request.");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleDeleteRequest = async (request) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to permanently delete this request?"
+      )
+    ) {
+      return;
+    }
+    setProcessingId(request["@id"]);
+    const payload = {
+      deleteRequests: [
+        {
+          "@gpId": request["@gpID"],
+          "@nudoss": request["@id"],
+        },
+      ],
+    };
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/delete/requests?role=${ROLE_PARAM}`,
+        payload,
+        { withCredentials: true }
+      );
+      if (response.data?.status === "OK") {
+        alert("Request successfully deleted!");
+        window.location.reload();
+      } else {
+        throw new Error("API responded with an error.");
+      }
+    } catch (err) {
+      console.error("Error deleting request:", err);
+      alert("An error occurred while deleting the request.");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  if (!requests) {
     return (
       <Layout>
-        <div className="text-white text-center mt-10">Loading requests...</div>
+        <div className="text-white text-center mt-10">no requests found</div>
       </Layout>
     );
   }
@@ -35,12 +109,12 @@ export default function RequestList() {
 
   const handleRowsPerPageChange = (e) => {
     setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1); // reset to first page
+    setCurrentPage(1);
   };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // reset to first page on search
+    setCurrentPage(1);
   };
 
   return (
@@ -49,9 +123,7 @@ export default function RequestList() {
         <div className="relative w-full max-w-5xl px-6 py-12 bg-white/10 backdrop-blur-md rounded-3xl shadow-lg border border-white/20 text-white">
           <h2 className="text-center text-3xl font-bold mb-2">Requests</h2>
 
-          {/* Top controls */}
           <div className="flex flex-col sm:flex-row justify-between mb-4 items-center gap-4 text-sm">
-            {/* Search Field */}
             <input
               type="text"
               placeholder="Chercher par label"
@@ -59,8 +131,6 @@ export default function RequestList() {
               onChange={handleSearchChange}
               className="px-3 py-1 rounded bg-white/10 text-white placeholder-white/70 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white"
             />
-
-            {/* Rows per page selector */}
             <div className="flex items-center gap-2">
               <label htmlFor="rowsPerPage" className="text-white/80">
                 Rows per page:
@@ -84,40 +154,68 @@ export default function RequestList() {
                 <tr className="bg-white/20 text-left uppercase text-xs tracking-wider">
                   <th className="px-4 py-2 border-b border-white/30">Label</th>
                   <th className="px-4 py-2 border-b border-white/30">
-                    Requester
+                    Recipient
                   </th>
-                  <th className="px-4 py-2 border-b border-white/30">
-                    Beneficiary
-                  </th>
+                  <th className="px-4 py-2 border-b border-white/30">Status</th>
                   <th className="px-4 py-2 border-b border-white/30">
                     Start Date
+                  </th>
+                  <th className="px-4 py-2 border-b border-white/30 text-center">
+                    Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white/5">
-                {currentRequests.map((request, index) => (
-                  <tr
-                    key={index}
-                    className="hover:bg-white/10 transition-colors border-t border-white/10"
-                  >
-                    <td className="px-4 py-2">{request["@label"] || "N/A"}</td>
-                    <td className="px-4 py-2">
-                      {request["@recipient"] || "N/A"}
-                    </td>
-                    <td className="px-4 py-2">{request["@status"] || "N/A"}</td>
-                    <td className="px-4 py-2">
-                      {request["@startDate"] || "N/A"}
-                    </td>
-                  </tr>
-                ))}
+                {currentRequests.map((request, index) => {
+                  const isProcessing = processingId === request["@id"];
+
+                  return (
+                    <tr
+                      key={index}
+                      className="hover:bg-white/10 transition-colors border-t border-white/10"
+                    >
+                      <td className="px-4 py-2">
+                        {request["@label"] || "N/A"}
+                      </td>
+                      <td className="px-4 py-2">
+                        {request["@recipient"] || "N/A"}
+                      </td>
+                      <td className="px-4 py-2">
+                        {request["@status"] || "N/A"}
+                      </td>
+                      <td className="px-4 py-2">
+                        {request["@startDate"] || "N/A"}
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        {request["@status"] === "EN COURS" && (
+                          <button
+                            onClick={() => handleCancelRequest(request)}
+                            disabled={isProcessing}
+                            className="font-semibold text-yellow-400 hover:text-yellow-300 disabled:opacity-50 transition-colors"
+                          >
+                            {isProcessing ? "Canceling..." : "Annuler"}
+                          </button>
+                        )}
+
+                        {request["@status"] === "Annulé par le demandeur" && (
+                          <button
+                            onClick={() => handleDeleteRequest(request)}
+                            disabled={isProcessing}
+                            className="font-semibold text-red-400 hover:text-red-300 disabled:opacity-50 transition-colors"
+                          >
+                            {isProcessing ? "Deleting..." : "Delete"}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
-          {/* Footer: Total records + Pagination */}
           <div className="flex flex-col md:flex-row justify-between items-center mt-8 text-white/80 text-sm">
             <p>Total records: {filteredRequests.length}</p>
-
             <div className="flex items-center gap-2 mt-4 md:mt-0">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}

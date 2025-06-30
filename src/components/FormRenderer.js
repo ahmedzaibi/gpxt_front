@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import axios from "axios";
 import HRINFODATAGRID from "./HRINFODATAGRID.jsx";
 import HRITEM from "./HRITEM";
 import HRTEXT from "./HRTEXT";
@@ -9,12 +10,16 @@ import HRCOMBO from "./HRCOMBO.jsx";
 import HRPAGE from "./HRPAGE.jsx";
 import Layout from "../interfaces/frontoffice/layout.js";
 import HRBLOB from "./HRBLOB.jsx";
+
 const FormRenderer = () => {
   const location = useLocation();
-  const xmlData = location.state?.xmlData;
+  const { xmlData, formName, formLabel } = location.state || {};
+
   const [components, setComponents] = useState([]);
-  const [labelNode, setLabelNode] = useState("no label found");
+  const [labelNode, setLabelNode] = useState(formLabel || "no label found");
   const [showSaveButton, setShowSaveButton] = useState(false);
+  const [formMetadata, setFormMetadata] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!xmlData) return;
@@ -30,17 +35,26 @@ const FormRenderer = () => {
       HRCOMBO,
       HRBLOB,
     };
-
-    const hrpage = xmlDoc.querySelector("OBJECT");
-    if (hrpage) setLabelNode(hrpage.getAttribute("Label") || "");
-
+    const population = xmlDoc.querySelector("HRDS")?.getAttribute("Population");
+    const domain = xmlDoc.querySelector("HRDOMAIN")?.getAttribute("Domain");
+    const dataSection = xmlDoc.querySelector("[Info]")?.getAttribute("Info");
+    if (population && domain && dataSection) {
+      setFormMetadata({ population, domain, dataSection });
+    } else {
+      console.error("Could not find all required metadata in XML.");
+    }
+    setLabelNode(
+      formLabel ||
+        xmlDoc.querySelector("OBJECT")?.getAttribute("Label") ||
+        "no label found"
+    );
     const walk = (nodes) => {
       const arr = [];
       nodes.forEach((n) => {
         if (n.nodeType === Node.ELEMENT_NODE && defined[n.tagName]) {
-          if (["HREDIT", "HRCOMBO", "HRBLOB"].includes(n.tagName))
+          if (["HREDIT", "HRCOMBO", "HRBLOB"].includes(n.tagName)) {
             setShowSaveButton(true);
-
+          }
           const children = walk(n.childNodes);
           const Elem = React.createElement(defined[n.tagName], {
             node: n,
@@ -53,7 +67,6 @@ const FormRenderer = () => {
       });
       return arr;
     };
-
     const page = xmlDoc.getElementsByTagName("HRPAGE")[0];
     if (page) {
       const comp = walk(page.childNodes);
@@ -61,33 +74,96 @@ const FormRenderer = () => {
         React.createElement(defined.HRPAGE, { node: page, children: comp }),
       ]);
     }
-  }, [xmlData]);
+  }, [xmlData, formLabel]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!formMetadata) {
+      alert("Form metadata not loaded from XML. Cannot save.");
+      return;
+    }
+    setIsSaving(true);
+
+    let role, dossier;
+    try {
+      const userSession = JSON.parse(sessionStorage.getItem("current-user-ss"));
+      role = userSession?.["@name"];
+      dossier = userSession?.["@dossierID"];
+      if (!role || dossier === undefined)
+        throw new Error("Role or Dossier ID not found.");
+    } catch (error) {
+      alert("Error: Could not get user data. Please log in again.");
+      setIsSaving(false);
+      return;
+    }
+
     const inputs = document.querySelectorAll("input[data-id], select[data-id]");
     const vals = {};
-    inputs.forEach((i) => {
-      const id = i.getAttribute("data-id");
-      if (i.type === "file" && i.files[0]) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          vals[id] = reader.result;
-          localStorage.setItem("formData", JSON.stringify(vals));
-          alert("Form data saved!");
-        };
-        reader.readAsDataURL(i.files[0]);
+    inputs.forEach((input) => {
+      const id = input.getAttribute("data-id");
+      if (!id) return;
+
+      if (input.type === "file") {
+        if (input.files && input.files.length > 0) {
+          vals[id] = `blobpath:${input.files[0].name}`;
+        } else {
+          vals[id] = "";
+        }
       } else {
-        vals[id] = i.value;
+        vals[id] = input.value;
       }
     });
 
-    // If no file input exists, save immediately
-    const hasFile = Array.from(inputs).some(
-      (i) => i.type === "file" && i.files[0]
+    const finalVals = Object.fromEntries(
+      Object.entries(vals).filter(([_, v]) => v !== "")
     );
-    if (!hasFile) {
-      localStorage.setItem("formData", JSON.stringify(vals));
-      alert("Form data saved!");
+
+    const dataItems = Object.entries(finalVals).map(([key, value]) => ({
+      item: key,
+      value: String(value),
+    }));
+
+    if (dataItems.length === 0) {
+      alert("No data to save. Please fill out the form.");
+      setIsSaving(false);
+      return;
+    }
+
+    dataItems.push({ item: "NULIGN", value: "0" });
+
+    const payload = {
+      occurrences: {
+        occurrence: [
+          {
+            "@population": formMetadata.population,
+            "@domain": formMetadata.domain,
+            "@datasection": formMetadata.dataSection,
+            "@dossier": String(dossier),
+            "@action": "M",
+            data: dataItems,
+            modified: true,
+          },
+        ],
+      },
+    };
+
+    const targetUrl = `https://tnhldapp0144.interpresales.mysoprahronline.com/hr-business-services-rest/business-services/gp/${formName}?role=${role}&lang=F&voc=FGA`;
+    const proxyUrl = `http://localhost:8181/${targetUrl}`;
+
+    try {
+      console.log("Sending FINAL SAVE request to proxy:", proxyUrl);
+      console.log("With JSON Payload:", JSON.stringify(payload, null, 2));
+      const response = await axios.post(proxyUrl, payload, {
+        withCredentials: true,
+      });
+      console.log("Server Response:", response.data);
+      alert("Form data saved successfully!");
+    } catch (error) {
+      console.error("Failed to save form data:", error);
+      const errorMsg =
+        error.response?.data?.message || error.response?.data || error.message;
+      alert(`Error saving form: ${errorMsg}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -108,9 +184,10 @@ const FormRenderer = () => {
             <div className="mt-6 text-center">
               <button
                 onClick={handleSave}
-                className="btn btn-warning btn-outline text-xl text-white"
+                disabled={isSaving}
+                className="btn btn-warning btn-outline text-xl text-white disabled:opacity-50"
               >
-                Save Form
+                {isSaving ? "Saving..." : "Save Form"}
               </button>
             </div>
           )}

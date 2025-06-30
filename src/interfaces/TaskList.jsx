@@ -8,18 +8,16 @@ export default function TaskList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Normalize tasks to always be an array
   const normalizedTasks = Array.isArray(tasks) ? tasks : tasks ? [tasks] : [];
 
   if (normalizedTasks.length === 0) {
     return (
       <Layout>
-        <div className="text-white text-center mt-10">Loading tasks...</div>
+        <div className="text-white text-center mt-10">no tasks found</div>
       </Layout>
     );
   }
 
-  // Filter tasks based on search term
   const filteredTasks = normalizedTasks.filter((task) =>
     task["@label"]?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -36,12 +34,12 @@ export default function TaskList() {
 
   const handleRowsPerPageChange = (e) => {
     setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1); // reset to first page
+    setCurrentPage(1);
   };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // reset to first page on search
+    setCurrentPage(1);
   };
 
   return (
@@ -50,9 +48,7 @@ export default function TaskList() {
         <div className="relative w-full max-w-5xl px-6 py-12 bg-white/10 backdrop-blur-md rounded-3xl shadow-lg border border-white/20 text-white">
           <h2 className="text-center text-3xl font-bold mb-2">Tasks</h2>
 
-          {/* Top controls */}
           <div className="flex flex-col sm:flex-row justify-between mb-4 items-center gap-4 text-sm">
-            {/* Search Field */}
             <input
               type="text"
               placeholder="Chercher par label"
@@ -61,7 +57,6 @@ export default function TaskList() {
               className="px-3 py-1 rounded bg-white/10 text-white placeholder-white/70 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white"
             />
 
-            {/* Rows per page selector */}
             <div className="flex items-center gap-2">
               <label htmlFor="rowsPerPage" className="text-white/80">
                 Rows per page:
@@ -79,7 +74,6 @@ export default function TaskList() {
             </div>
           </div>
 
-          {/* Task table */}
           <div className="overflow-x-auto">
             <table className="min-w-full table-auto text-sm text-white border-collapse">
               <thead>

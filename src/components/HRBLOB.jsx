@@ -1,47 +1,75 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
+import axios from "axios";
+import { useFieldId } from "../hooks/useFieldId";
 
 const HRBLOB = ({ node, children }) => {
-  const [imageData, setImageData] = useState(null);
-  const id = node.getAttribute("ID") || Math.random().toString();
+  const id = useFieldId(node);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("formData");
-    if (saved) {
-      const data = JSON.parse(saved);
-      if (data[id]) setImageData(data[id]);
-    }
-  }, [id]);
-
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageData(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file, file.name);
+
+    const UPLOAD_TARGET_URL = `https://tnhldapp0144.interpresales.mysoprahronline.com//hr-business-services-rest/business-services/fileresource/upload`;
+    const PROXY_UPLOAD_URL = `http://localhost:8181/${UPLOAD_TARGET_URL}`;
+
+    try {
+      console.log(`Uploading ${file.name} to ${PROXY_UPLOAD_URL}`);
+
+      await axios.post(PROXY_UPLOAD_URL, formData, {
+        withCredentials: true,
+      });
+
+      console.log(`File ${file.name} uploaded successfully.`);
+    } catch (error) {
+      console.error("File upload failed:", error);
+      alert(
+        `Error uploading file: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+      setImagePreview(null);
+    } finally {
+      setIsUploading(false);
     }
   };
+
+  if (!id) {
+    return (
+      <div style={{ color: "red", position: "absolute" }}>
+        Error: Input misconfigured (no valid ID)
+      </div>
+    );
+  }
 
   const left = parseInt(node.getAttribute("Left") || "0", 10);
   const top = parseInt(node.getAttribute("Top") || "0", 10);
 
   return (
     <StyledWrapper
-      style={{
-        position: "absolute",
-        left: `${left}px`,
-        top: `${top}px`,
-      }}
+      style={{ position: "absolute", left: `${left}px`, top: `${top}px` }}
     >
       <div className="input-div">
+        {isUploading && <div className="upload-indicator">Uploading...</div>}
         <input
           className="input"
           name="file"
           type="file"
           data-id={id}
           onChange={handleChange}
+          disabled={isUploading}
         />
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -60,9 +88,9 @@ const HRBLOB = ({ node, children }) => {
           <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
           <polyline points="16 16 12 12 8 16" />
         </svg>
-        {imageData && (
+        {imagePreview && (
           <img
-            src={imageData}
+            src={imagePreview}
             alt="Uploaded"
             className="preview"
             style={{

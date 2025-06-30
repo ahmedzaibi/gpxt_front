@@ -57,7 +57,6 @@ export default function ChangePassword() {
 
   return (
     <section className="min-h-screen flex items-stretch text-white relative">
-      {/* Left side with background video */}
       <div className="lg:flex w-1/2 hidden relative items-center overflow-hidden">
         <video
           className="absolute inset-0 w-full h-full object-cover"
@@ -70,7 +69,6 @@ export default function ChangePassword() {
         </video>
       </div>
 
-      {/* Right side with form */}
       <div
         className="lg:w-1/2 w-full flex items-center justify-center text-center md:px-16 px-0 z-0"
         style={{
@@ -92,7 +90,6 @@ export default function ChangePassword() {
           <div className="absolute bg-black opacity-60 inset-0 z-0"></div>
         </div>
 
-        {/* Content */}
         <div className="w-full py-6 z-20">
           <div className="w-full z-10 flex justify-center ">
             <img src="/images/logosopra.png" alt="Logo" className="h-16" />

@@ -11,7 +11,7 @@ export default function ReportList() {
   if (!reports || reports.length === 0) {
     return (
       <Layout>
-        <div className="text-white text-center mt-10">Loading reports...</div>
+        <div className="text-white text-center mt-10">no reports found</div>
       </Layout>
     );
   }
@@ -37,7 +37,7 @@ export default function ReportList() {
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // reset to first page on search
+    setCurrentPage(1);
   };
 
   return (
@@ -46,9 +46,7 @@ export default function ReportList() {
         <div className="relative w-full max-w-5xl px-6 py-12 bg-white/10 backdrop-blur-md rounded-3xl shadow-lg border border-white/20 text-white">
           <h2 className="text-center text-3xl font-bold mb-2">Reports</h2>
 
-          {/* Top controls */}
           <div className="flex flex-col sm:flex-row justify-between mb-4 items-center gap-4 text-sm">
-            {/* Search Field */}
             <input
               type="text"
               placeholder="Chercher par label"
@@ -57,7 +55,6 @@ export default function ReportList() {
               className="px-3 py-1 rounded bg-white/10 text-white placeholder-white/70 border border-white/20 focus:outline-none focus:ring-1 focus:ring-white"
             />
 
-            {/* Rows per page selector */}
             <div className="flex items-center gap-2">
               <label htmlFor="rowsPerPage" className="text-white/80">
                 Rows per page:
@@ -98,7 +95,6 @@ export default function ReportList() {
             </table>
           </div>
 
-          {/* Footer: Total records + Pagination */}
           <div className="flex flex-col md:flex-row justify-between items-center mt-8 text-white/80 text-sm">
             <p>Total records: {filteredReports.length}</p>
 

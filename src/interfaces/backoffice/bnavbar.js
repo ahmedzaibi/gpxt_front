@@ -19,13 +19,13 @@ const BNavbar = () => {
       }`}
     >
       <div className="flex-1">
-        <a href="/dashboard">
+        <button href="/dashboard">
           <img
             src="/images/logosopra.png"
             alt="Logo"
             className="btn btn-warning btn-ghost text-xl"
           />
-        </a>
+        </button>
       </div>
       <div className="flex gap-2">
         <div className="dropdown dropdown-end">

@@ -9,12 +9,13 @@ import {
   InboxIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { useContext, useRef, useEffect } from "react";
+import { useContext, useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DataContext } from "../../context/DataContext";
 import Navbar from "./navbar";
 import Footer from "./footer";
-import ChatbotCard from "../ChatbotCard"; // ✅ import it
+import ChatbotCard from "../ChatbotCard";
+
 const iconMap = {
   PAD: AcademicCapIcon,
   ABS: CalendarDaysIcon,
@@ -32,21 +33,127 @@ const Layout = ({ children }) => {
   const videoRef = useRef(null);
   const navigate = useNavigate();
 
+  // --- NEW: State for the filtered menu and its loading status ---
+  const [filteredMenu, setFilteredMenu] = useState([]);
+  const [isMenuLoading, setIsMenuLoading] = useState(true);
+
+  // This useEffect for the video remains unchanged
   useEffect(() => {
-    videoRef.current?.play();
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    const hasVideoPlayed = localStorage.getItem("hasVideoPlayed");
+
+    if (hasVideoPlayed) {
+      const setLastFrame = () => {
+        if (videoElement.duration) {
+          videoElement.currentTime = videoElement.duration;
+          videoElement.pause();
+        }
+      };
+
+      if (videoElement.readyState >= 1) {
+        setLastFrame();
+      } else {
+        videoElement.addEventListener("loadedmetadata", setLastFrame, {
+          once: true,
+        });
+      }
+    } else {
+      videoElement.play().catch((error) => {
+        console.error("Video autoplay was prevented by the browser:", error);
+      });
+    }
   }, []);
 
+  // --- NEW: useEffect to filter and validate the menu data ---
+  useEffect(() => {
+    const filterAndValidateMenu = async () => {
+      // Don't run if there's no data from the context
+      if (!menudata || menudata.length === 0) {
+        setIsMenuLoading(false);
+        setFilteredMenu([]);
+        return;
+      }
+
+      setIsMenuLoading(true);
+
+      // Map each top-level menu item to a promise.
+      // This promise will resolve to a new item with its actions pre-filtered.
+      const validatedMenuPromises = menudata.map(async (item) => {
+        // Ensure 'actions' is always an array
+        const actions = Array.isArray(item.functionalAction)
+          ? item.functionalAction
+          : item.functionalAction
+          ? [item.functionalAction]
+          : [];
+
+        // Create a validation promise for each action within the current item
+        const validatedActionPromises = actions.map(async (action) => {
+          const impl = Array.isArray(action.functionalActionImplementation)
+            ? action.functionalActionImplementation[0]
+            : action.functionalActionImplementation;
+
+          const subName = impl?.["@name"];
+          if (!subName) return null; // Can't validate without a name
+
+          try {
+            // Check against the local API
+            const response = await fetch(
+              `http://localhost:8080/api/forms/${subName}`
+            );
+            // If the response is OK, the form exists. Keep the action. Otherwise, return null.
+            return response.ok ? action : null;
+          } catch (err) {
+            console.warn(`Validation check failed for form '${subName}':`, err);
+            return null; // Discard if the check itself errors
+          }
+        });
+
+        // Wait for all actions in the current item to be validated
+        const validatedActions = await Promise.all(validatedActionPromises);
+
+        // Filter out the nulls (the non-existent actions)
+        const validActionsOnly = validatedActions.filter(Boolean);
+
+        // Return a new menu item object containing only the valid actions
+        return { ...item, functionalAction: validActionsOnly };
+      });
+
+      // Wait for all top-level menu items to be processed
+      const menuWithFilteredActions = await Promise.all(validatedMenuPromises);
+
+      // Finally, remove any top-level menu items that have no valid sub-items left
+      const finalMenu = menuWithFilteredActions.filter(
+        (item) => item.functionalAction.length > 0
+      );
+
+      setFilteredMenu(finalMenu);
+      setIsMenuLoading(false);
+    };
+
+    filterAndValidateMenu().catch((error) => {
+      console.error("Failed to filter and validate menu:", error);
+      setIsMenuLoading(false);
+    });
+  }, [menudata]); // This effect re-runs whenever 'menudata' from the context changes
+
+  const handleVideoEnd = () => {
+    localStorage.setItem("hasVideoPlayed", "true");
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+  };
+
+  // This function now works on pre-filtered data, but its internal logic is the same
   const generateMenuItems = (menuList) =>
     menuList.map((item, idx) => {
       const label = item["@label"] || `Item ${idx}`;
       const gpName = item["@name"];
       const IconComponent = iconMap[gpName] || AcademicCapIcon;
 
-      const actions = Array.isArray(item.functionalAction)
-        ? item.functionalAction
-        : item.functionalAction
-        ? [item.functionalAction]
-        : [];
+      // This is guaranteed to be an array of valid actions now
+      const actions = item.functionalAction;
 
       return (
         <li key={idx}>
@@ -73,6 +180,7 @@ const Layout = ({ children }) => {
                     <button
                       onClick={async () => {
                         try {
+                          // This fetch is for a known-to-be-valid form
                           const res = await fetch(
                             `http://localhost:8080/api/forms/${subName}`
                           );
@@ -112,9 +220,9 @@ const Layout = ({ children }) => {
         src="/images/Scene-13 (2).mp4"
         className="absolute top-0 left-0 w-full h-full object-cover z-0"
         muted
-        autoPlay
         playsInline
-        onEnded={(e) => e.target.pause()}
+        onEnded={handleVideoEnd}
+        preload="auto"
       />
       <div className="relative z-20 flex flex-col min-h-screen">
         <Navbar />
@@ -122,7 +230,12 @@ const Layout = ({ children }) => {
           <div className="group relative h-[calc(100vh-4rem)]">
             <div className="w-16 hover:w-64 transition-all duration-300 ease-in-out bg-white/10 backdrop-blur-sm text-white h-full overflow-hidden">
               <ul className="menu p-4 space-y-2">
-                {generateMenuItems(menudata)}
+                {/* --- UPDATE: Conditional rendering for loading state --- */}
+                {isMenuLoading ? (
+                  <li>Loading menu...</li>
+                ) : (
+                  generateMenuItems(filteredMenu)
+                )}
               </ul>
             </div>
           </div>

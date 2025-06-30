@@ -1,10 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useFieldId } from "../hooks/useFieldId";
 
 const HRCOMBO = ({ node, children }) => {
+  const id = useFieldId(node);
   const [value, setValue] = useState("");
-  const id = node.getAttribute("ID") || Math.random().toString();
+
+  const options = useMemo(() => {
+    const optionNodes = Array.from(node.querySelectorAll("HROPTION"));
+    const parsedOptions = optionNodes.map((optNode) => ({
+      value: optNode.getAttribute("Value"),
+      label: optNode.textContent.trim(),
+    }));
+    return [{ value: "", label: "Select..." }, ...parsedOptions];
+  }, [node]);
 
   useEffect(() => {
+    if (!id) return;
     const saved = localStorage.getItem("formData");
     if (saved) {
       const data = JSON.parse(saved);
@@ -12,23 +23,19 @@ const HRCOMBO = ({ node, children }) => {
     }
   }, [id]);
 
-  const handleChange = (e) => {
-    setValue(e.target.value);
-    // no onChange callback here!
-  };
-
-  const options = [
-    { value: "", label: "Select" },
-    { value: "option1", label: "Option 1" },
-    { value: "option2", label: "Option 2" },
-    { value: "option3", label: "Option 3" },
-  ];
+  if (!id) {
+    return (
+      <div style={{ color: "red", position: "absolute" }}>
+        Error: HRCOMBO misconfigured
+      </div>
+    );
+  }
 
   return (
     <div>
       <select
         value={value}
-        onChange={handleChange}
+        onChange={(e) => setValue(e.target.value)}
         data-id={id}
         style={{
           position: "absolute",

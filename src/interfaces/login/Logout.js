@@ -4,17 +4,16 @@ import axios from "axios";
 
 const Logout = () => {
   const navigate = useNavigate();
-  const hasLoggedOut = useRef(false); // ✅ Track if logout has run
+  const hasLoggedOut = useRef(false);
 
   useEffect(() => {
     const logout = async () => {
-      if (hasLoggedOut.current) return; // ✅ Prevent multiple calls
+      if (hasLoggedOut.current) return;
       hasLoggedOut.current = true;
 
       try {
         await axios.get(
           `http://localhost:8181/https://tnhldapp0144.interpresales.mysoprahronline.com//hr-business-services-rest/business-services/logout`,
-
           {
             withCredentials: true,
           }

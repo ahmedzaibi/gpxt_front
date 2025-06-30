@@ -21,7 +21,6 @@ export default function Chatbot() {
     });
   };
   const sendMessage = async () => {
-    // Print the completion returned by the LLM.
     if (!prompt.trim()) return;
 
     const userMessage = { sender: "user", text: prompt };

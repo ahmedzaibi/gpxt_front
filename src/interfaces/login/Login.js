@@ -64,9 +64,6 @@ export default function Login() {
           localStorage.removeItem("rememberedEmail");
         }
 
-        //const currentRole = data.roles.role?.find(
-        //(role) => role["@category"] !== "HRREP"
-        //);
         const currentRole = data.roles.role;
         if (currentRole) {
           sessionStorage.setItem(
@@ -117,7 +114,7 @@ export default function Login() {
           setmenudata(menudata || []);
         }
 
-        navigate("/upload?justLoggedIn=true");
+        navigate("/tasks?justLoggedIn=true");
       } else {
         setError(data.message || "Invalid credentials");
       }
@@ -129,7 +126,6 @@ export default function Login() {
 
   return (
     <section className="min-h-screen flex items-stretch text-white relative">
-      {/* Left side with background video */}
       <div className="lg:flex w-1/2 hidden relative items-center overflow-hidden">
         <video
           className="absolute inset-0 w-full h-full object-cover"
@@ -143,7 +139,6 @@ export default function Login() {
         </video>
       </div>
 
-      {/* Right side with form */}
       <div
         className="lg:w-1/2 w-full flex items-center justify-center text-center md:px-16 px-0 z-0"
         style={{
@@ -152,7 +147,6 @@ export default function Login() {
           backdropFilter: "blur(3px)",
         }}
       >
-        {/* Mobile video background */}
         <div className="absolute lg:hidden z-10 inset-0 overflow-hidden">
           <video
             className="w-full h-full object-cover"
@@ -166,7 +160,6 @@ export default function Login() {
           <div className="absolute bg-black opacity-60 inset-0 z-0"></div>
         </div>
 
-        {/* Login content */}
         <div className="w-full py-6 z-20">
           <div className="w-full z-10 flex justify-center ">
             <img src="/images/logosopra.png" alt="Logo" className="h-16" />
